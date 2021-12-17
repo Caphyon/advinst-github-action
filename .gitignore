@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+# npm
+.npmrc
+
+# VS Code
+.vscode/

@@ -1,0 +1,6 @@
+name: 'Advanced Installer Tool'
+description: 'Deploys Advanced Installer tool and builds an AIP project.'
+author: 'Caphyon'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

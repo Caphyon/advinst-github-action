@@ -1,0 +1,16 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+/.git* text eol=lf
+*.sh   text eol=lf
+
+.editorconfig text eol=lf
+.eslintignore text eol=lf
+.eslintrc     text eol=lf
+.mpmrc        text eol=lf
+.prettierrc   text eol=lf
+.prettierignore text eol=lf
+.yml          text eol=lf
+.yaml         text eol=lf
+*.ts          text eol=lf
+*.json        text eol=lf
