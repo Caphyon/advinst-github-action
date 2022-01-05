@@ -6,7 +6,7 @@ async function run(): Promise<void> {
     core.info(`Advinst version: ${version}`);
     const license = core.getInput('advinst-license');
     core.info(`Advinst license: ${license}`);
-    const enable_com = core.getBooleanInput('advinst-enable-com');
+    const enable_com = core.getInput('advinst-enable-com');
     core.info(`Advinst license url: ${enable_com}`);
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);

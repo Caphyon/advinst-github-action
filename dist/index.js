@@ -43,7 +43,7 @@ function run() {
             core.info(`Advinst version: ${version}`);
             const license = core.getInput('advinst-license');
             core.info(`Advinst license: ${license}`);
-            const enable_com = core.getBooleanInput('advinst-license-url');
+            const enable_com = core.getInput('advinst-enable-com');
             core.info(`Advinst license url: ${enable_com}`);
         }
         catch (error) {
