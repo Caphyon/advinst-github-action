@@ -13,4 +13,6 @@
 .yml          text eol=lf
 .yaml         text eol=lf
 *.ts          text eol=lf
+*.js          text eol=lf
+*.js.map      text eol=lf
 *.json        text eol=lf
