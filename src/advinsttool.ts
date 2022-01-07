@@ -17,10 +17,9 @@ export class AdvinstTool {
     'msiexec /a "%s" TARGETDIR="%s" /qn';
   private static advinstRegisterCmdTemplate = '%s /RegisterCI %s';
   private static advinstStartComCmdTemplate = '%s /REGSERVER';
-  private static advinstComPathTemplate = '%s\\advancedinstaller.com';
+  private static advinstComPathTemplate = '%s\\bin\\x86\\advancedinstaller.com';
 
   private static advinstCacheToolName = 'advinst';
-  private static advinstCacheToolArch = 'x86';
 
   constructor(version: string, license: string, enableCom: boolean) {
     this.version = version;
@@ -32,8 +31,7 @@ export class AdvinstTool {
     //Check cache first
     let toolRoot = toolCache.find(
       AdvinstTool.advinstCacheToolName,
-      this.version,
-      AdvinstTool.advinstCacheToolArch
+      this.version
     );
 
     //If not in cache, download and extract
@@ -78,8 +76,7 @@ export class AdvinstTool {
     return await toolCache.cacheDir(
       extractFolder,
       AdvinstTool.advinstCacheToolName,
-      this.version,
-      AdvinstTool.advinstCacheToolArch
+      this.version
     );
   }
 

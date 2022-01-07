@@ -54,7 +54,7 @@ class AdvinstTool {
     getPath() {
         return __awaiter(this, void 0, void 0, function* () {
             //Check cache first
-            let toolRoot = toolCache.find(AdvinstTool.advinstCacheToolName, this.version, AdvinstTool.advinstCacheToolArch);
+            let toolRoot = toolCache.find(AdvinstTool.advinstCacheToolName, this.version);
             //If not in cache, download and extract
             if (!toolRoot) {
                 const setup = yield this.download();
@@ -85,7 +85,7 @@ class AdvinstTool {
             if (ret.exitCode !== 0) {
                 throw new Error(ret.stdout);
             }
-            return yield toolCache.cacheDir(extractFolder, AdvinstTool.advinstCacheToolName, this.version, AdvinstTool.advinstCacheToolArch);
+            return yield toolCache.cacheDir(extractFolder, AdvinstTool.advinstCacheToolName, this.version);
         });
     }
     register(toolPath) {
@@ -121,9 +121,8 @@ AdvinstTool.advinstDownloadUrlTemplate = 'https://www.advancedinstaller.com/down
 AdvinstTool.advinstExtractCmdTemplate = 'msiexec /a "%s" TARGETDIR="%s" /qn';
 AdvinstTool.advinstRegisterCmdTemplate = '%s /RegisterCI %s';
 AdvinstTool.advinstStartComCmdTemplate = '%s /REGSERVER';
-AdvinstTool.advinstComPathTemplate = '%s\\advancedinstaller.com';
+AdvinstTool.advinstComPathTemplate = '%s\\bin\\x86\\advancedinstaller.com';
 AdvinstTool.advinstCacheToolName = 'advinst';
-AdvinstTool.advinstCacheToolArch = 'x86';
 
 
 /***/ }),
