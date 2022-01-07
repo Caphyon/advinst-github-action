@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "description": "setup advinst action",
-  "main": "dist/index.js",
+  "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf dist",
+    "clean": "rimraf main && rimraf post && rimraf lib",
     "rebuild": "npm run clean && npm run build",
     "prettier": "prettier --check **/*.ts",
     "prettier-fix": "prettier --write **/*.ts",
     "lint": "eslint src/**/*.ts",
     "lint-fix": "eslint --fix src/**/*.ts",
-    "pack": "ncc build --source-map",
+    "pack": "ncc build ./lib/main.js -o ./main --source-map && ncc build ./lib/post.js -o ./post --source-map",
     "test": "jest",
     "dist": "npm run rebuild && npm run prettier && npm run lint && npm run pack && npm run test"
   },
@@ -33,14 +33,11 @@
   "author": "Caphyon",
   "license": "MIT",
   "dependencies": {
-    "@actions/cache": "^1.0.8",
     "@actions/core": "^1.6.0",
     "@actions/exec": "^1.1.0",
-    "@actions/github": "^5.0.0",
-    "@actions/glob": "^0.2.0",
-    "@actions/http-client": "^1.0.11",
     "@actions/io": "^1.1.1",
     "@actions/tool-cache": "^1.7.1",
+    "config-ini-parser": "^1.5.9",
     "semver": "^7.3.5"
   },
   "devDependencies": {
