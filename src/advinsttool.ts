@@ -1,8 +1,9 @@
+import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as toolCache from '@actions/tool-cache';
 
-import assert from 'assert';
 import {existsSync} from 'fs';
+import {getRunnerTempDir} from './utils';
 import {join} from 'path';
 import util from 'util';
 
@@ -18,8 +19,13 @@ export class AdvinstTool {
   private static advinstRegisterCmdTemplate = '%s /RegisterCI %s';
   private static advinstStartComCmdTemplate = '%s /REGSERVER';
   private static advinstComPathTemplate = '%s\\bin\\x86\\advancedinstaller.com';
+  private static asdvinstMsbuildTagetPathTemplate =
+    '%s\\ProgramFilesFolder\\MSBuild\\Caphyon\\Advanced Installer';
 
   private static advinstCacheToolName = 'advinst';
+
+  private static advinstMSBuildTargetsVar = 'AdvancedInstallerMSBuildTargets';
+  private static advinstToolRootVar = 'AdvancedInstallerRoot';
 
   constructor(version: string, license: string, enableCom: boolean) {
     this.version = version;
@@ -29,6 +35,7 @@ export class AdvinstTool {
 
   async getPath(): Promise<string> {
     //Check cache first
+    core.info(`Checking cache for advinst tool with version: ${this.version}`);
     let toolRoot = toolCache.find(
       AdvinstTool.advinstCacheToolName,
       this.version
@@ -36,8 +43,11 @@ export class AdvinstTool {
 
     //If not in cache, download and extract
     if (!toolRoot) {
+      core.info('Tool not found in cache');
       const setup = await this.download();
       toolRoot = await this.extract(setup);
+    } else {
+      core.info('Tool found in cache');
     }
 
     //Register and enable COM
@@ -49,11 +59,13 @@ export class AdvinstTool {
     }
     await this.register(toolPath);
     await this.registerCom(toolPath);
+    this.exportVariables(toolRoot);
 
     return toolPath;
   }
 
   private async download(): Promise<string> {
+    core.info('Downloading advinst tool');
     const url = util.format(
       AdvinstTool.advinstDownloadUrlTemplate,
       this.version
@@ -63,7 +75,8 @@ export class AdvinstTool {
 
   private async extract(setupPath: string): Promise<string> {
     //Extract to agent temp folder
-    const extractFolder = join(this.getTempFolder(), 'advinst');
+    core.info('Extracting advinst tool');
+    const extractFolder = join(getRunnerTempDir(), 'advinst');
     const cmd = util.format(
       AdvinstTool.advinstExtractCmdTemplate,
       setupPath,
@@ -82,6 +95,7 @@ export class AdvinstTool {
 
   private async register(toolPath: string): Promise<void> {
     if (this.license) {
+      core.info('Registering advinst tool');
       const cmd = util.format(
         AdvinstTool.advinstRegisterCmdTemplate,
         toolPath,
@@ -96,6 +110,7 @@ export class AdvinstTool {
 
   private async registerCom(toolPath: string): Promise<void> {
     if (this.enableCom) {
+      core.info('Enabling advinst COM interface');
       const cmd = util.format(AdvinstTool.advinstStartComCmdTemplate, toolPath);
       const ret = await exec.getExecOutput(cmd);
       if (ret.exitCode !== 0) {
@@ -104,9 +119,11 @@ export class AdvinstTool {
     }
   }
 
-  private getTempFolder(): string {
-    const tempDirectory = process.env['RUNNER_TEMP'] || '';
-    assert(tempDirectory, 'Expected RUNNER_TEMP to be defined');
-    return tempDirectory;
+  private exportVariables(toolRoot: string): void {
+    core.exportVariable(AdvinstTool.advinstToolRootVar, toolRoot);
+    core.exportVariable(
+      AdvinstTool.advinstMSBuildTargetsVar,
+      util.format(AdvinstTool.asdvinstMsbuildTagetPathTemplate, toolRoot)
+    );
   }
 }

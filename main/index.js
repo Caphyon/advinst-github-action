@@ -39,10 +39,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdvinstTool = void 0;
+const core = __importStar(__nccwpck_require__(186));
 const exec = __importStar(__nccwpck_require__(514));
 const toolCache = __importStar(__nccwpck_require__(784));
-const assert_1 = __importDefault(__nccwpck_require__(491));
 const fs_1 = __nccwpck_require__(147);
+const utils_1 = __nccwpck_require__(918);
 const path_1 = __nccwpck_require__(17);
 const util_1 = __importDefault(__nccwpck_require__(837));
 class AdvinstTool {
@@ -54,11 +55,16 @@ class AdvinstTool {
     getPath() {
         return __awaiter(this, void 0, void 0, function* () {
             //Check cache first
+            core.info(`Checking cache for advinst tool with version: ${this.version}`);
             let toolRoot = toolCache.find(AdvinstTool.advinstCacheToolName, this.version);
             //If not in cache, download and extract
             if (!toolRoot) {
+                core.info('Tool not found in cache');
                 const setup = yield this.download();
                 toolRoot = yield this.extract(setup);
+            }
+            else {
+                core.info('Tool found in cache');
             }
             //Register and enable COM
             const toolPath = util_1.default.format(AdvinstTool.advinstComPathTemplate, toolRoot);
@@ -67,11 +73,13 @@ class AdvinstTool {
             }
             yield this.register(toolPath);
             yield this.registerCom(toolPath);
+            this.exportVariables(toolRoot);
             return toolPath;
         });
     }
     download() {
         return __awaiter(this, void 0, void 0, function* () {
+            core.info('Downloading advinst tool');
             const url = util_1.default.format(AdvinstTool.advinstDownloadUrlTemplate, this.version);
             return yield toolCache.downloadTool(url);
         });
@@ -79,7 +87,8 @@ class AdvinstTool {
     extract(setupPath) {
         return __awaiter(this, void 0, void 0, function* () {
             //Extract to agent temp folder
-            const extractFolder = (0, path_1.join)(this.getTempFolder(), 'advinst');
+            core.info('Extracting advinst tool');
+            const extractFolder = (0, path_1.join)((0, utils_1.getRunnerTempDir)(), 'advinst');
             const cmd = util_1.default.format(AdvinstTool.advinstExtractCmdTemplate, setupPath, extractFolder);
             const ret = yield exec.getExecOutput(cmd);
             if (ret.exitCode !== 0) {
@@ -91,6 +100,7 @@ class AdvinstTool {
     register(toolPath) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.license) {
+                core.info('Registering advinst tool');
                 const cmd = util_1.default.format(AdvinstTool.advinstRegisterCmdTemplate, toolPath, this.license);
                 const ret = yield exec.getExecOutput(cmd);
                 if (ret.exitCode !== 0) {
@@ -102,6 +112,7 @@ class AdvinstTool {
     registerCom(toolPath) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.enableCom) {
+                core.info('Enabling advinst COM interface');
                 const cmd = util_1.default.format(AdvinstTool.advinstStartComCmdTemplate, toolPath);
                 const ret = yield exec.getExecOutput(cmd);
                 if (ret.exitCode !== 0) {
@@ -110,10 +121,9 @@ class AdvinstTool {
             }
         });
     }
-    getTempFolder() {
-        const tempDirectory = process.env['RUNNER_TEMP'] || '';
-        (0, assert_1.default)(tempDirectory, 'Expected RUNNER_TEMP to be defined');
-        return tempDirectory;
+    exportVariables(toolRoot) {
+        core.exportVariable(AdvinstTool.advinstToolRootVar, toolRoot);
+        core.exportVariable(AdvinstTool.advinstMSBuildTargetsVar, util_1.default.format(AdvinstTool.asdvinstMsbuildTagetPathTemplate, toolRoot));
     }
 }
 exports.AdvinstTool = AdvinstTool;
@@ -122,7 +132,10 @@ AdvinstTool.advinstExtractCmdTemplate = 'msiexec /a "%s" TARGETDIR="%s" /qn';
 AdvinstTool.advinstRegisterCmdTemplate = '%s /RegisterCI %s';
 AdvinstTool.advinstStartComCmdTemplate = '%s /REGSERVER';
 AdvinstTool.advinstComPathTemplate = '%s\\bin\\x86\\advancedinstaller.com';
+AdvinstTool.asdvinstMsbuildTagetPathTemplate = '%s\\ProgramFilesFolder\\MSBuild\\Caphyon\\Advanced Installer';
 AdvinstTool.advinstCacheToolName = 'advinst';
+AdvinstTool.advinstMSBuildTargetsVar = 'AdvancedInstallerMSBuildTargets';
+AdvinstTool.advinstToolRootVar = 'AdvancedInstallerRoot';
 
 
 /***/ }),
@@ -230,9 +243,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const advinsttool_1 = __nccwpck_require__(635);
 const advinstversions_1 = __nccwpck_require__(979);
+const utils_1 = __nccwpck_require__(918);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            if (!(0, utils_1.isWindows)()) {
+                throw new Error('This action is only supported on Windows platforms');
+            }
             const version = core.getInput('advinst-version') || (yield (0, advinstversions_1.getLatest)());
             core.debug(`Advinst version: ${version}`);
             const license = core.getInput('advinst-license');
@@ -250,6 +267,36 @@ function run() {
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 918:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getVariable = exports.getRunnerTempDir = exports.isWindows = void 0;
+const assert_1 = __importDefault(__nccwpck_require__(491));
+function isWindows() {
+    return process.platform === 'win32';
+}
+exports.isWindows = isWindows;
+function getRunnerTempDir() {
+    const tempDirectory = process.env['RUNNER_TEMP'] || '';
+    (0, assert_1.default)(tempDirectory, 'Expected RUNNER_TEMP to be defined');
+    return tempDirectory;
+}
+exports.getRunnerTempDir = getRunnerTempDir;
+function getVariable(name) {
+    const value = process.env[name] || '';
+    return value;
+}
+exports.getVariable = getVariable;
 
 
 /***/ }),

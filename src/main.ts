@@ -1,9 +1,13 @@
 import * as core from '@actions/core';
 import {AdvinstTool} from './advinsttool';
 import {getLatest} from './advinstversions';
+import {isWindows} from './utils';
 
 async function run(): Promise<void> {
   try {
+    if (!isWindows()) {
+      throw new Error('This action is only supported on Windows platforms');
+    }
     const version = core.getInput('advinst-version') || (await getLatest());
     core.debug(`Advinst version: ${version}`);
     const license = core.getInput('advinst-license');
