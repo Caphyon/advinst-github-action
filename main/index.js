@@ -1,6 +1,159 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 170:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AdvinstBuilder = void 0;
+const exec = __importStar(__nccwpck_require__(514));
+const io = __importStar(__nccwpck_require__(436));
+const util = __importStar(__nccwpck_require__(837));
+const advinstcommands_1 = __nccwpck_require__(190);
+class AdvinstBuilder {
+    constructor(toolPath) {
+        this.toolPath = toolPath;
+        this.aipPath = '';
+        this.aipBuildName = '';
+        this.aipPackageName = '';
+        this.aipOutputDir = '';
+        this.aipCommands = [];
+    }
+    run() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.aipPath) {
+                return;
+            }
+            const advinstCommands = new advinstcommands_1.AdvinstCommands([]);
+            if (this.aipPackageName) {
+                advinstCommands.add(`SetPackageName "${this.aipPackageName}" -buildname "${this.aipBuildName}"`);
+            }
+            if (this.aipOutputDir) {
+                advinstCommands.add(`SetOutputLocation -path "${this.aipOutputDir}" -buildname "${this.aipBuildName}"`);
+            }
+            if (this.aipCommands.length > 0) {
+                advinstCommands.add(this.aipCommands);
+            }
+            advinstCommands.add(this.aipBuildName ? `Build -buildslist "${this.aipBuildName}"` : `Build`);
+            let commandsFile = '';
+            try {
+                commandsFile = yield advinstCommands.toCommandsFile();
+                const cmd = util.format(AdvinstBuilder.advinstExecCmdTemplate, this.toolPath, this.aipPath, commandsFile);
+                const ret = yield exec.getExecOutput(cmd);
+                if (ret.exitCode !== 0) {
+                    throw new Error(ret.stdout);
+                }
+            }
+            catch (error) {
+                throw error;
+            }
+            finally {
+                if (commandsFile) {
+                    io.rmRF(commandsFile);
+                }
+            }
+        });
+    }
+    setAipPath(aipPath) {
+        this.aipPath = aipPath;
+    }
+    setAipBuildName(aipBuildName) {
+        this.aipBuildName = aipBuildName;
+    }
+    setAipPackageName(aipPackageName) {
+        this.aipPackageName = aipPackageName;
+    }
+    setAipOutputDir(aipOutputDir) {
+        this.aipOutputDir = aipOutputDir;
+    }
+    setAipCommands(aipCommands) {
+        this.aipCommands = aipCommands.split('\n');
+    }
+}
+exports.AdvinstBuilder = AdvinstBuilder;
+AdvinstBuilder.advinstExecCmdTemplate = '%s /execute "%s" "%s"';
+
+
+/***/ }),
+
+/***/ 190:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AdvinstCommands = void 0;
+const utils_1 = __nccwpck_require__(918);
+const path_1 = __nccwpck_require__(17);
+const fs_1 = __nccwpck_require__(147);
+class AdvinstCommands {
+    constructor(commands) {
+        this.commands = [];
+        this.commands = commands;
+    }
+    add(command) {
+        this.commands = this.commands.concat(command);
+    }
+    toCommandsFile() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let commandsFileContent = [';aic;'];
+            commandsFileContent = commandsFileContent.concat(this.commands);
+            const commandsFile = (0, path_1.format)({
+                dir: (0, utils_1.getRunnerTempDir)(),
+                ext: '.aic',
+                name: (0, utils_1.getVariable)('GITHUB_RUN_ID')
+            });
+            yield fs_1.promises.writeFile(commandsFile, commandsFileContent.join('\r\n'), {
+                encoding: 'utf8'
+            });
+            return commandsFile;
+        });
+    }
+}
+exports.AdvinstCommands = AdvinstCommands;
+
+
+/***/ }),
+
 /***/ 635:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -241,6 +394,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
+const advinstbuilder_1 = __nccwpck_require__(170);
 const advinsttool_1 = __nccwpck_require__(635);
 const advinstversions_1 = __nccwpck_require__(979);
 const utils_1 = __nccwpck_require__(918);
@@ -256,9 +410,24 @@ function run() {
             core.debug(`Advinst license: ${license}`);
             const enable_com = core.getInput('advinst-enable-com');
             core.debug(`Advinst enable com: ${enable_com}`);
+            core.startGroup('Advanced Installer Tool Deploy');
             const advinstTool = new advinsttool_1.AdvinstTool(version, license, enable_com === 'true');
             const toolPath = yield advinstTool.getPath();
-            core.debug(`Advinst tool path: ${toolPath}`);
+            core.endGroup();
+            const aipPath = core.getInput('aip-path');
+            if (!aipPath) {
+                core.debug('No AIP project path provided. Skipping project build step.');
+                return;
+            }
+            core.startGroup(`${aipPath} project build`);
+            const advinstRunner = new advinstbuilder_1.AdvinstBuilder(toolPath);
+            advinstRunner.setAipPath(aipPath);
+            advinstRunner.setAipBuildName(core.getInput('aip-build-name'));
+            advinstRunner.setAipPackageName(core.getInput('aip-package-name'));
+            advinstRunner.setAipOutputDir(core.getInput('aip-output-dir'));
+            advinstRunner.setAipCommands(core.getInput('aip-commands'));
+            yield advinstRunner.run();
+            core.endGroup();
         }
         catch (error) {
             if (error instanceof Error)
@@ -287,7 +456,7 @@ function isWindows() {
 }
 exports.isWindows = isWindows;
 function getRunnerTempDir() {
-    const tempDirectory = process.env['RUNNER_TEMP'] || '';
+    const tempDirectory = getVariable('RUNNER_TEMP');
     (0, assert_1.default)(tempDirectory, 'Expected RUNNER_TEMP to be defined');
     return tempDirectory;
 }

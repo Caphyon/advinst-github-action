@@ -5,7 +5,7 @@ export function isWindows(): boolean {
 }
 
 export function getRunnerTempDir(): string {
-  const tempDirectory = process.env['RUNNER_TEMP'] || '';
+  const tempDirectory = getVariable('RUNNER_TEMP');
   assert(tempDirectory, 'Expected RUNNER_TEMP to be defined');
   return tempDirectory;
 }

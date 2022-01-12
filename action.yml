@@ -12,6 +12,22 @@ inputs:
     description: 'Configure your Advanced Installer project by using custom interfaces and PowerShell commands. This capability needs Advanced Installer 16.1 or higher.'
     required: false
     default: 'false'
+  aip-path:
+    description: 'Path to the AIP project to build'
+    required: false
+  aip-build-name:
+    description: 'Name of the AIP project build configuration'
+    required: false
+  aip-package-name:
+    description: 'Path to the build output package name'
+    required: false
+  aip-output-dir:
+    description: 'Path to the build output directory'
+    required: false
+  aip-commands:
+    description: 'Commands to execute in the AIP project'
+    required: false
+
 runs:
   using: 'node16'
   main: 'main\index.js'

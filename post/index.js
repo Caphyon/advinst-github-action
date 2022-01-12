@@ -74,7 +74,7 @@ function isWindows() {
 }
 exports.isWindows = isWindows;
 function getRunnerTempDir() {
-    const tempDirectory = process.env['RUNNER_TEMP'] || '';
+    const tempDirectory = getVariable('RUNNER_TEMP');
     (0, assert_1.default)(tempDirectory, 'Expected RUNNER_TEMP to be defined');
     return tempDirectory;
 }
