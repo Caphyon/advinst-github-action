@@ -6,7 +6,7 @@ import {join} from 'path';
 
 async function run(): Promise<void> {
   try {
-    core.info('Clanup....');
+    core.info('Cleanup....');
 
     const licenseFile = join(
       getVariable('ProgramData'),

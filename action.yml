@@ -8,8 +8,8 @@ inputs:
   advinst-license:
     description: 'Advanced Installer version to acquire. If no version is specified the latest will be used. For a list of available versions please see http://www.advancedinstaller.com/version-history.html'
     required: false
-  advinst-enable-com:
-    description: 'Configure your Advanced Installer project by using custom interfaces and PowerShell commands. This capability needs Advanced Installer 16.1 or higher.'
+  advinst-enable-automation:
+    description: 'Use advanced installer from COM interfaces and PowerShell commands. This capability needs Advanced Installer 16.1 or higher.'
     required: false
     default: 'false'
   aip-path:
