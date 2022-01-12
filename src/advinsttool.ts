@@ -23,6 +23,7 @@ export class AdvinstTool {
     '%s\\ProgramFilesFolder\\MSBuild\\Caphyon\\Advanced Installer';
 
   private static advinstCacheToolName = 'advinst';
+  private static advinstCacheToolArch = 'x86';
 
   private static advinstMSBuildTargetsVar = 'AdvancedInstallerMSBuildTargets';
   private static advinstToolRootVar = 'AdvancedInstallerRoot';
@@ -38,7 +39,8 @@ export class AdvinstTool {
     core.info(`Checking cache for advinst tool with version: ${this.version}`);
     let toolRoot = toolCache.find(
       AdvinstTool.advinstCacheToolName,
-      this.version
+      this.version,
+      AdvinstTool.advinstCacheToolArch
     );
 
     //If not in cache, download and extract
@@ -89,7 +91,8 @@ export class AdvinstTool {
     return await toolCache.cacheDir(
       extractFolder,
       AdvinstTool.advinstCacheToolName,
-      this.version
+      this.version,
+      AdvinstTool.advinstCacheToolArch
     );
   }
 
