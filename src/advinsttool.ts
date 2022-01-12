@@ -4,7 +4,7 @@ import * as toolCache from '@actions/tool-cache';
 
 import {existsSync} from 'fs';
 import {getRunnerTempDir} from './utils';
-import {join} from 'path';
+import {join, dirname} from 'path';
 import util from 'util';
 
 export class AdvinstTool {
@@ -62,6 +62,9 @@ export class AdvinstTool {
     await this.register(toolPath);
     await this.registerCom(toolPath);
     this.exportVariables(toolRoot);
+
+    //Add to PATH
+    core.addPath(dirname(toolPath));
 
     return toolPath;
   }
