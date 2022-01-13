@@ -30,5 +30,6 @@ inputs:
 
 runs:
   using: 'node16'
+  pre:  'pre\index.js'
   main: 'main\index.js'
   post: 'post\index.js'

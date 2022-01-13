@@ -6,13 +6,13 @@
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf main && rimraf post && rimraf lib",
+    "clean": "rimraf pre && rimraf main && rimraf post && rimraf lib",
     "rebuild": "npm run clean && npm run build",
     "prettier": "prettier --check **/*.ts",
     "prettier-fix": "prettier --write **/*.ts",
     "lint": "eslint src/**/*.ts",
     "lint-fix": "eslint --fix src/**/*.ts",
-    "pack": "ncc build ./lib/main.js -o ./main --source-map && ncc build ./lib/post.js -o ./post --source-map",
+    "pack": "ncc build ./lib/pre.js -o ./pre --source-map && ncc build ./lib/main.js -o ./main --source-map && ncc build ./lib/post.js -o ./post --source-map",
     "test": "jest",
     "dist": "npm run rebuild && npm run prettier && npm run lint && npm run pack && npm run test"
   },
