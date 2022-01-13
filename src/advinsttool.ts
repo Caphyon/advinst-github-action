@@ -2,9 +2,9 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as toolCache from '@actions/tool-cache';
 
+import {dirname, join} from 'path';
 import {existsSync} from 'fs';
 import {getRunnerTempDir} from './utils';
-import {join, dirname} from 'path';
 import util from 'util';
 
 export class AdvinstTool {

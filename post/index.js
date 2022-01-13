@@ -42,7 +42,7 @@ const path_1 = __nccwpck_require__(17);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            core.info('Clanup....');
+            core.info('Cleanup....');
             const licenseFile = (0, path_1.join)((0, utils_1.getVariable)('ProgramData'), 'Caphyon\\Advanced Installer\\license80.dat');
             core.info(`Removing license file: ${licenseFile}`);
             yield io.rmRF(licenseFile);

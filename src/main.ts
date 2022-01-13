@@ -13,7 +13,7 @@ async function run(): Promise<void> {
     core.debug(`Advinst version: ${version}`);
     const license = core.getInput('advinst-license');
     core.debug(`Advinst license: ${license}`);
-    const enable_com = core.getInput('advinst-enable-com');
+    const enable_com = core.getInput('advinst-enable-automation');
     core.debug(`Advinst enable com: ${enable_com}`);
 
     core.startGroup('Advanced Installer Tool Deploy');

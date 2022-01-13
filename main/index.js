@@ -195,9 +195,9 @@ exports.AdvinstTool = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const exec = __importStar(__nccwpck_require__(514));
 const toolCache = __importStar(__nccwpck_require__(784));
+const path_1 = __nccwpck_require__(17);
 const fs_1 = __nccwpck_require__(147);
 const utils_1 = __nccwpck_require__(918);
-const path_1 = __nccwpck_require__(17);
 const util_1 = __importDefault(__nccwpck_require__(837));
 class AdvinstTool {
     constructor(version, license, enableCom) {
@@ -209,7 +209,7 @@ class AdvinstTool {
         return __awaiter(this, void 0, void 0, function* () {
             //Check cache first
             core.info(`Checking cache for advinst tool with version: ${this.version}`);
-            let toolRoot = toolCache.find(AdvinstTool.advinstCacheToolName, this.version);
+            let toolRoot = toolCache.find(AdvinstTool.advinstCacheToolName, this.version, AdvinstTool.advinstCacheToolArch);
             //If not in cache, download and extract
             if (!toolRoot) {
                 core.info('Tool not found in cache');
@@ -227,6 +227,8 @@ class AdvinstTool {
             yield this.register(toolPath);
             yield this.registerCom(toolPath);
             this.exportVariables(toolRoot);
+            //Add to PATH
+            core.addPath((0, path_1.dirname)(toolPath));
             return toolPath;
         });
     }
@@ -247,7 +249,7 @@ class AdvinstTool {
             if (ret.exitCode !== 0) {
                 throw new Error(ret.stdout);
             }
-            return yield toolCache.cacheDir(extractFolder, AdvinstTool.advinstCacheToolName, this.version);
+            return yield toolCache.cacheDir(extractFolder, AdvinstTool.advinstCacheToolName, this.version, AdvinstTool.advinstCacheToolArch);
         });
     }
     register(toolPath) {
@@ -287,6 +289,7 @@ AdvinstTool.advinstStartComCmdTemplate = '%s /REGSERVER';
 AdvinstTool.advinstComPathTemplate = '%s\\bin\\x86\\advancedinstaller.com';
 AdvinstTool.asdvinstMsbuildTagetPathTemplate = '%s\\ProgramFilesFolder\\MSBuild\\Caphyon\\Advanced Installer';
 AdvinstTool.advinstCacheToolName = 'advinst';
+AdvinstTool.advinstCacheToolArch = 'x86';
 AdvinstTool.advinstMSBuildTargetsVar = 'AdvancedInstallerMSBuildTargets';
 AdvinstTool.advinstToolRootVar = 'AdvancedInstallerRoot';
 
@@ -408,7 +411,7 @@ function run() {
             core.debug(`Advinst version: ${version}`);
             const license = core.getInput('advinst-license');
             core.debug(`Advinst license: ${license}`);
-            const enable_com = core.getInput('advinst-enable-com');
+            const enable_com = core.getInput('advinst-enable-automation');
             core.debug(`Advinst enable com: ${enable_com}`);
             core.startGroup('Advanced Installer Tool Deploy');
             const advinstTool = new advinsttool_1.AdvinstTool(version, license, enable_com === 'true');
