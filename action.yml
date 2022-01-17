@@ -3,29 +3,29 @@ description: 'Deploys Advanced Installer tool and builds an AIP project.'
 author: 'Caphyon'
 inputs:
   advinst-version:
-    description: 'Advanced Installer version to deploy'
+    description: 'Advanced Installer version to deploy. This parameter is optional. If not specified the latest version will be used. For a list of valid versions please see http://www.advancedinstaller.com/version-history.html'
     required: false
   advinst-license:
-    description: 'Advanced Installer version to acquire. If no version is specified the latest will be used. For a list of available versions please see http://www.advancedinstaller.com/version-history.html'
+    description: 'Advanced Installer license ID. This parameter is optional if you are using a simple project type.'
     required: false
   advinst-enable-automation:
-    description: 'Use advanced installer from COM interfaces and PowerShell commands. This capability needs Advanced Installer 16.1 or higher.'
+    description: 'Enable Advanced Installer PowerShell automation. This capability needs Advanced Installer 16.1 or higher.'
     required: false
     default: 'false'
   aip-path:
-    description: 'Path to the AIP project to build'
+    description: 'The Advanced Installer project (.AIP) to be built.'
     required: false
   aip-build-name:
-    description: 'Name of the AIP project build configuration'
+    description: 'Advanced Installer project build to use'
     required: false
   aip-package-name:
-    description: 'Path to the build output package name'
+    description: 'Output package name'
     required: false
   aip-output-dir:
-    description: 'Path to the build output directory'
+    description: 'Result package location'
     required: false
   aip-commands:
-    description: 'Commands to execute in the AIP project'
+    description: 'Additional arguments passed along with the package build command'
     required: false
 
 runs:

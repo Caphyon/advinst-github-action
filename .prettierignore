@@ -1,6 +1,4 @@
-main/
-post/
-lib/
+dist/
 lib/
 node_modules/
 
