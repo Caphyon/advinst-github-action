@@ -3,8 +3,7 @@ import * as exec from '@actions/exec';
 import * as toolCache from '@actions/tool-cache';
 
 import {dirname, join} from 'path';
-import {existsSync} from 'fs';
-import {getRunnerTempDir} from './utils';
+import {exists, getRunnerTempDir} from './utils';
 import util from 'util';
 
 export class AdvinstTool {
@@ -54,7 +53,8 @@ export class AdvinstTool {
 
     //Register and enable COM
     const toolPath = util.format(AdvinstTool.advinstComPathTemplate, toolRoot);
-    if (!existsSync(toolPath)) {
+    const ret = await exists(toolPath);
+    if (!ret) {
       throw new Error(
         util.format('Expected to find %s, but it was not found.', toolPath)
       );
@@ -69,7 +69,7 @@ export class AdvinstTool {
     return toolPath;
   }
 
-  private async download(): Promise<string> {
+  async download(): Promise<string> {
     core.info('Downloading advinst tool');
     const url = util.format(
       AdvinstTool.advinstDownloadUrlTemplate,
@@ -78,7 +78,7 @@ export class AdvinstTool {
     return await toolCache.downloadTool(url);
   }
 
-  private async extract(setupPath: string): Promise<string> {
+  async extract(setupPath: string): Promise<string> {
     //Extract to agent temp folder
     core.info('Extracting advinst tool');
     const extractFolder = join(getRunnerTempDir(), 'advinst');
@@ -99,7 +99,7 @@ export class AdvinstTool {
     );
   }
 
-  private async register(toolPath: string): Promise<void> {
+  async register(toolPath: string): Promise<void> {
     if (this.license) {
       core.info('Registering advinst tool');
       const cmd = util.format(
@@ -114,7 +114,7 @@ export class AdvinstTool {
     }
   }
 
-  private async registerCom(toolPath: string): Promise<void> {
+  async registerCom(toolPath: string): Promise<void> {
     if (this.enableCom) {
       core.info('Enabling advinst COM interface');
       const cmd = util.format(AdvinstTool.advinstStartComCmdTemplate, toolPath);
@@ -125,7 +125,7 @@ export class AdvinstTool {
     }
   }
 
-  private exportVariables(toolRoot: string): void {
+  exportVariables(toolRoot: string): void {
     core.exportVariable(AdvinstTool.advinstToolRootVar, toolRoot);
     core.exportVariable(
       AdvinstTool.advinstMSBuildTargetsVar,

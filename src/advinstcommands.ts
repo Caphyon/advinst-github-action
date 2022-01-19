@@ -1,6 +1,6 @@
 import {getRunnerTempDir, getVariable} from './utils';
 import {format} from 'path';
-import {promises} from 'fs';
+import * as fs from 'fs/promises';
 
 export class AdvinstCommands {
   private commands: string[] = [];
@@ -23,7 +23,7 @@ export class AdvinstCommands {
       name: getVariable('GITHUB_RUN_ID')
     });
 
-    await promises.writeFile(commandsFile, commandsFileContent.join('\r\n'), {
+    await fs.writeFile(commandsFile, commandsFileContent.join('\r\n'), {
       encoding: 'utf8'
     });
     return commandsFile;
