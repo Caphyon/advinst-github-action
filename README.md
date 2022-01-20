@@ -1,6 +1,6 @@
 # Advanced Installer GitHub Action
 
-This action will integrate [Advanced Installer Tool](https://www.advancedinstaller.com) in the GitHub CI/CD workflow by:
+This action will integrate [Advanced Installer Tool](https://www.advancedinstaller.com) in the GitHub CI/CD workflow. It has the following capabilities: 
 * Deploy Advanced Installer on the GitHub runner.
 * Build an Advanced Installer project (.AIP)
 
