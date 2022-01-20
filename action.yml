@@ -33,3 +33,7 @@ runs:
   pre:  'dist\pre\index.js'
   main: 'dist\main\index.js'
   post: 'dist\post\index.js'
+
+branding:
+  icon: 'box'
+  color: 'blue'
