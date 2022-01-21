@@ -29,7 +29,7 @@ The input parameters are of two categories:
 * Tool Deploy Parameters - their names have format: **advinst-***
 * AIP Project Parameters - their names have format: **aip-***
 
-***By specifying only the Tool Parameters you can restrict the action usage to deploy only. You can use it when you plan on using Advanced Installer from  a [PowerShell script](https://www.advancedinstaller.com/user-guide/powershell-automation.html) or build a [Visual Studio project](https://www.advancedinstaller.com/user-guide/ai-ext-vs-project.html).***
+***IMPORTANT: By specifying only the Tool Parameters you can restrict the action usage to deploy only. You can use it when you plan on using Advanced Installer from  a [PowerShell script](https://www.advancedinstaller.com/user-guide/powershell-automation.html) or build a [Visual Studio project](https://www.advancedinstaller.com/user-guide/ai-ext-vs-project.html).***
 
 ### advinst-version
 
