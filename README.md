@@ -67,7 +67,7 @@ Additional Advanced Installer arguments passed along with the package build comm
 
 ***IMPORTANT: The the changes made to the AIP file through the edit commands are available only during the pipeline. They will not be stored.***
 
-## Exmaples
+## Examples
 
 ### 1. Deploy tool and build an aip project
 
