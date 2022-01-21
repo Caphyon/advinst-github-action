@@ -29,8 +29,7 @@ The input parameters are of two categories:
 * Tool Deploy Parameters - their names have format: **advinst-***
 * AIP Project Parameters - their names have format: **aip-***
 
-***By specifying only the Tool Parameters you can restrict the action usage to deploy only. You can use it when you plan on using Advanced Installer from  a [PowerShell script](https://www.advancedinstaller.com/user-guide/powershell-automation.html) or build a
-our [Visual Studio project](https://www.advancedinstaller.com/user-guide/ai-ext-vs-project.html).***
+***By specifying only the Tool Parameters you can restrict the action usage to deploy only. You can use it when you plan on using Advanced Installer from  a [PowerShell script](https://www.advancedinstaller.com/user-guide/powershell-automation.html) or build a [Visual Studio project](https://www.advancedinstaller.com/user-guide/ai-ext-vs-project.html).***
 
 ### advinst-version
 
@@ -65,6 +64,8 @@ Result package location. Since this option is related to a build, it requires **
 ### aip-commands
 
 Additional Advanced Installer arguments passed along with the package build command. E.g. SetVersion 1.2.3. For a complete list of supported commands see the [edit commands](https://www.advancedinstaller.com/user-guide/command-line-editing.html).
+
+***IMPORTANT: The the changes made to the AIP file through the edit commands are available only during the pipeline. They will not be stored.***
 
 ## Exmaples
 
@@ -156,3 +157,6 @@ jobs:
 
 We would love to hear your feedback! Tell us how to improve this  action at ***support at advancedinstaller dot com***, or
 open a [Github Issue](https://github.com/Caphyon/advinst-github-action/issues).
+
+On our website you can find a list with all the [CI/CD integrations for Advanced Installer](https://www.advancedinstaller.com/installer-continuous-integration.html).
+
