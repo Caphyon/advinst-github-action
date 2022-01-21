@@ -1,4 +1,3 @@
-import assert from 'assert';
 import fs from 'fs/promises';
 
 export function isWindows(): boolean {

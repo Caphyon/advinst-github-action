@@ -1,6 +1,6 @@
+import * as fs from 'fs/promises';
 import {getRunnerTempDir, getVariable} from './utils';
 import {format} from 'path';
-import * as fs from 'fs/promises';
 
 export class AdvinstCommands {
   private commands: string[] = [];
