@@ -36,6 +36,8 @@ our [Visual Studio project](https://www.advancedinstaller.com/user-guide/ai-ext-
 
 Advanced Installer version to deploy. If not specified the latest version will be used. For a list of valid versions please see the [versions history](http://www.advancedinstaller.com/version-history.html)
 
+You can specify a custom download location by using the ***advancedinstaller_url*** environment variable.
+
 ### advinst-license
 
 Advanced Installer license ID. This parameter is optional if you are using a [simple](https://www.advancedinstaller.com/user-guide/tutorial-simple.html) project type.
