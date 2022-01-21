@@ -111,6 +111,25 @@ AdvinstBuilder.advinstExecCmdTemplate = '%s /execute "%s" "%s"';
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -122,9 +141,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AdvinstCommands = void 0;
+const fs = __importStar(__nccwpck_require__(292));
 const utils_1 = __nccwpck_require__(918);
 const path_1 = __nccwpck_require__(17);
-const fs_1 = __nccwpck_require__(147);
 class AdvinstCommands {
     constructor(commands) {
         this.commands = [];
@@ -142,7 +161,7 @@ class AdvinstCommands {
                 ext: '.aic',
                 name: (0, utils_1.getVariable)('GITHUB_RUN_ID')
             });
-            yield fs_1.promises.writeFile(commandsFile, commandsFileContent.join('\r\n'), {
+            yield fs.writeFile(commandsFile, commandsFileContent.join('\r\n'), {
                 encoding: 'utf8'
             });
             return commandsFile;
@@ -196,11 +215,11 @@ const core = __importStar(__nccwpck_require__(186));
 const exec = __importStar(__nccwpck_require__(514));
 const toolCache = __importStar(__nccwpck_require__(784));
 const path_1 = __nccwpck_require__(17);
-const fs_1 = __nccwpck_require__(147);
 const utils_1 = __nccwpck_require__(918);
 const util_1 = __importDefault(__nccwpck_require__(837));
 class AdvinstTool {
     constructor(version, license, enableCom) {
+        this.version = version;
         this.version = version;
         this.license = license;
         this.enableCom = enableCom;
@@ -221,7 +240,8 @@ class AdvinstTool {
             }
             //Register and enable COM
             const toolPath = util_1.default.format(AdvinstTool.advinstComPathTemplate, toolRoot);
-            if (!(0, fs_1.existsSync)(toolPath)) {
+            const ret = yield (0, utils_1.exists)(toolPath);
+            if (!ret) {
                 throw new Error(util_1.default.format('Expected to find %s, but it was not found.', toolPath));
             }
             yield this.register(toolPath);
@@ -234,7 +254,13 @@ class AdvinstTool {
     }
     download() {
         return __awaiter(this, void 0, void 0, function* () {
-            core.info('Downloading advinst tool');
+            //Check if a custom URL is set. If so, use it.
+            const customUrl = (0, utils_1.getVariable)(AdvinstTool.advinstCustomUrlVar);
+            if (customUrl) {
+                core.info(util_1.default.format('Using custom URL for advinst tool: %s', customUrl));
+                return yield toolCache.downloadTool(customUrl);
+            }
+            core.info(`Downloading advinst tool with version: ${this.version}`);
             const url = util_1.default.format(AdvinstTool.advinstDownloadUrlTemplate, this.version);
             return yield toolCache.downloadTool(url);
         });
@@ -282,6 +308,7 @@ class AdvinstTool {
     }
 }
 exports.AdvinstTool = AdvinstTool;
+AdvinstTool.advinstCustomUrlVar = 'advancedinstaller_url';
 AdvinstTool.advinstDownloadUrlTemplate = 'https://www.advancedinstaller.com/downloads/%s/advinst.msi';
 AdvinstTool.advinstExtractCmdTemplate = 'msiexec /a "%s" TARGETDIR="%s" /qn';
 AdvinstTool.advinstRegisterCmdTemplate = '%s /RegisterCI %s';
@@ -448,20 +475,27 @@ run();
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getVariable = exports.getRunnerTempDir = exports.isWindows = void 0;
-const assert_1 = __importDefault(__nccwpck_require__(491));
+exports.exists = exports.getVariable = exports.getRunnerTempDir = exports.isWindows = void 0;
+const promises_1 = __importDefault(__nccwpck_require__(292));
 function isWindows() {
     return process.platform === 'win32';
 }
 exports.isWindows = isWindows;
 function getRunnerTempDir() {
-    const tempDirectory = getVariable('RUNNER_TEMP');
-    (0, assert_1.default)(tempDirectory, 'Expected RUNNER_TEMP to be defined');
-    return tempDirectory;
+    return getVariable('RUNNER_TEMP');
 }
 exports.getRunnerTempDir = getRunnerTempDir;
 function getVariable(name) {
@@ -469,6 +503,18 @@ function getVariable(name) {
     return value;
 }
 exports.getVariable = getVariable;
+function exists(path) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield promises_1.default.access(path);
+            return true;
+        }
+        catch (error) {
+            return false;
+        }
+    });
+}
+exports.exists = exists;
 
 
 /***/ }),
@@ -3049,7 +3095,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports._readLinuxVersionFile = exports._getOsVersion = exports._findMatch = void 0;
-const semver = __importStar(__nccwpck_require__(562));
+const semver = __importStar(__nccwpck_require__(911));
 const core_1 = __nccwpck_require__(186);
 // needs to be require for core node modules to be mocked
 /* eslint @typescript-eslint/no-require-imports: 0 */
@@ -3284,7 +3330,7 @@ const mm = __importStar(__nccwpck_require__(473));
 const os = __importStar(__nccwpck_require__(37));
 const path = __importStar(__nccwpck_require__(17));
 const httpm = __importStar(__nccwpck_require__(925));
-const semver = __importStar(__nccwpck_require__(562));
+const semver = __importStar(__nccwpck_require__(911));
 const stream = __importStar(__nccwpck_require__(781));
 const util = __importStar(__nccwpck_require__(837));
 const v4_1 = __importDefault(__nccwpck_require__(824));
@@ -3911,7 +3957,589 @@ function _unique(values) {
 
 /***/ }),
 
-/***/ 562:
+/***/ 244:
+/***/ ((__unused_webpack_module, exports) => {
+
+/**
+ * Created by Erxin, Shang(Edwin) on 6/21/2016.
+ * JavaScript Configuration file(.ini) content parser, similar to python ConfigParser without I/O operations
+ * The license is under GPL-3.0
+ * Git repo:https://github.com/shangerxin/config-ini
+ * Author homepage: http://www.shangerxin.com
+ * Version, 1.5.9
+ */
+
+(function (exports) {
+    var error = Object.assign(new Error(), {
+        name: "ConfigIniParser Error",
+        message: "Parse config ini file error",
+    });
+
+    var errorNoSection = Object.assign(new Error(), {
+        name: "ConfigIniParser Error",
+        message: "The specify section not found",
+    });
+
+    var errorNoOption = Object.assign(new Error(), {
+        name: "ConfigIniParser Error",
+        message: "The specify option not found",
+    });
+
+    var errorDuplicateSectionError = Object.assign(new Error(), {
+        name: "ConfigIniParser Error",
+        message: "Found duplicated section in the given ini file",
+    });
+
+    var errorCallParseMultipleTimes = Object.assign(new Error(), {
+        name: "ConfigIniParser Error",
+        message: "Multiple call parse on the same parser instance",
+    });
+
+    var errorIncorrectArgumentType = Object.assign(new TypeError(), {
+        name: "ConfigIniParser Error",
+        message: "The argument type is not correct",
+    });
+
+    var DEFAULT_SECTION = "__DEFAULT_SECTION__";
+    var _sectionRegex = /^\s*\[\s*([^\]]+?)\s*\]\s*$/;
+    var _optionRegex = /\s*([^=:\s]+)\s*[=:]\s*(.*)\s*/;
+    var _commentRegex = /^\s*[#;].*/;
+    var _emptyRegex = /^\s*$/;
+    var SECTION_NAME_INDEX = 1;
+    var OPTION_NAME_INDEX = 1;
+    var OPTION_VALUE_INDEX = 2;
+    var NOT_FOUND = -1;
+    var DEFAULT_DELIMITER = "\n";
+
+    function _findSection(iniStructure, sectionName) {
+        var sections = iniStructure.sections;
+        for (var i = 0; i < sections.length; i++) {
+            var section = sections[i];
+            if (section.name == sectionName) {
+                return section;
+            }
+        }
+    }
+
+    function _findSectionIndex(iniStructure, sectionName) {
+        var sections = iniStructure.sections;
+        for (var i = 0; i < sections.length; i++) {
+            var section = sections[i];
+            if (section.name == sectionName) {
+                return i;
+            }
+        }
+
+        return NOT_FOUND;
+    }
+
+    function _findOption(section, optionName) {
+        var options = section.options;
+        for (var i = 0; i < options.length; i++) {
+            var option = options[i];
+            if (option.name == optionName) {
+                return option;
+            }
+        }
+    }
+
+    function _findOptionIndex(section, optionName) {
+        var options = section.options;
+        for (var i = 0; i < options.length; i++) {
+            var option = options[i];
+            if (option.name == optionName) {
+                return i;
+            }
+        }
+
+        return NOT_FOUND;
+    }
+
+    function _createSection(name) {
+        return {
+            name: name,
+            options: [],
+        };
+    }
+
+    function _createOption(name, value) {
+        return {
+            name: name,
+            value: value,
+        };
+    }
+
+    /*
+     * Create a ini file parser, the format of ini file could be found at
+     * https://en.wikipedia.org/wiki/INI_file
+     *
+     * Duplicated sections will cause exception, duplicated options will be
+     * ignored and only the first one will take effect.
+     *
+     * @constructor
+     * @param {string} delimiter, the line delimiter which is used to separate the lines
+     * @return {ConfigIniParser} a ConfigIniParser object
+     */
+    var ConfigIniParser = function (delimiter) {
+        this.delimiter = delimiter ? delimiter : DEFAULT_DELIMITER;
+        this._calledParse = false;
+
+        /*
+         _init object structure
+         {
+             sections:[
+                 {
+                     name:string,
+                     options:[
+                         {
+                             name:string,
+                             value:value
+                         },
+                     ]
+                 },
+             ]
+         }
+         */
+        this._ini = {
+            sections: [],
+        };
+
+        this._ini.sections.push(_createSection(DEFAULT_SECTION));
+    };
+
+    /*
+     * Create a new section, if the section is already contain in the structure then
+     * a duplicated section exception will be thrown
+     * @param {string} sectionName a section name defined in ini [section name]
+     * @return {object} the created section object
+     */
+    ConfigIniParser.prototype.addSection = function (sectionName) {
+        if (_findSection(this._ini, sectionName)) {
+            throw errorDuplicateSectionError;
+        } else {
+            var section = _createSection(sectionName);
+            this._ini.sections.push(section);
+            return this;
+        }
+    };
+
+    /*
+     * Get a specific option value
+     * @param {string} sectionName the name defined in ini `[section name]`. If null the default
+     *      section will be used.
+     * @param {string} optionName the name defined in ini `option-name = option-value`
+     * @param {object} defaultValue optional default value to be used when the option does not exist. If it is not provided and the option value does not exist, then an exception is thrown.
+     * @return {string/object} the string value of the option or defaultValue
+     */
+    ConfigIniParser.prototype.get = function (
+        sectionName,
+        optionName,
+        defaultValue
+    ) {
+        var section = _findSection(
+            this._ini,
+            sectionName ? sectionName : DEFAULT_SECTION
+        );
+        if (section) {
+            var option = _findOption(section, optionName);
+            if (option) {
+                return option.value;
+            }
+        }
+
+        if (defaultValue === undefined) {
+            throw errorNoOption;
+        } else {
+            return defaultValue;
+        }
+    };
+
+    /*
+     * Get a option from the default section. This is a convenient method when get the
+     * option from the default section.
+     * @param {string} optionName the name defined in ini `option-name = option-value`
+     * @param {object} defaultValue optional default value to be used when the option does not exist. If it is not provided and the value does not exist, then an exception is thrown.
+     * @return {string/object} the string value of the option or defaultValue
+     */
+    ConfigIniParser.prototype.getOptionFromDefaultSection = function (
+        optionName,
+        defaultValue
+    ) {
+        return this.get(null, optionName, defaultValue);
+    };
+
+    /*
+     * Get the option from the section and convert the value to boolean, if the value
+     * is a number then return true if it is
+     * not equal to 0; if the value is string and which value is "true"/"false" then
+     * will be converted to bool, return true if it is "true";
+     * @param {string} sectionName the name defined in ini `[section name]`
+     * @param {string} optionName the name defined in ini `option-name = option-value`
+     * @return {boolean} indicate the value is true or false
+     */
+    ConfigIniParser.prototype.getBoolean = function (sectionName, optionName) {
+        var value = this.get(
+            sectionName ? sectionName : DEFAULT_SECTION,
+            optionName
+        );
+
+        if (isNaN(value)) {
+            return String(value).toLowerCase() == "true";
+        } else {
+            return value != 0;
+        }
+    };
+
+    /*
+     * Get the option from the default section and convert the value to boolean, if the
+     * value is a number then return true if it is
+     * not equal to 0; if the value is string and which value is "true"/"false" then
+     * will be converted to bool, return true if it is "true";
+     * @param {string} optionName the name defined in ini `option-name = option-value`
+     * @return {boolean} indicate the value is true or false
+     */
+    ConfigIniParser.prototype.getBooleanFromDefaultSection = function (
+        optionName
+    ) {
+        return this.getBoolean(null, optionName);
+    };
+
+    /*
+     * Get the option from the section and convert the value to number
+     * @param {string} sectionName the name defined in ini `[section name]`
+     * @param {string} optionName the name defined in ini `option-name = option-value`
+     * @return {number/NaN} number or NaN
+     */
+    ConfigIniParser.prototype.getNumber = function (sectionName, optionName) {
+        return +this.get(
+            sectionName ? sectionName : DEFAULT_SECTION,
+            optionName
+        );
+    };
+
+    /*
+     * Get the option from the default section and convert the value to number
+     * @param {string} optionName the name defined in ini `option-name = option-value`
+     * @return {number/NaN} number or NaN
+     */
+    ConfigIniParser.prototype.getNumberFromDefaultSection = function (
+        optionName
+    ) {
+        return this.getNumber(null, optionName);
+    };
+
+    /*
+     * Check a specify section is exist or not
+     * @return {boolean} to indicate the result
+     */
+    ConfigIniParser.prototype.isHaveSection = function (sectionName) {
+        if (!sectionName) {
+            throw errorIncorrectArgumentType;
+        }
+        return !!_findSection(this._ini, sectionName);
+    };
+
+    /*
+     * Check an option is exist in a section or not.
+     * @param {string} sectionName the name of the section. If null a default section will
+     * be used
+     * @return {boolean} boolean
+     */
+    ConfigIniParser.prototype.isHaveOption = function (
+        sectionName,
+        optionName
+    ) {
+        var section = _findSection(
+            this._ini,
+            sectionName ? sectionName : DEFAULT_SECTION
+        );
+        if (section) {
+            var option = _findOption(section, optionName);
+            if (option) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    /*
+     * Check an option is exist in the default section or not.
+     * @return {boolean} boolean
+     */
+    ConfigIniParser.prototype.isHaveOptionInDefaultSection = function (
+        optionName
+    ) {
+        return this.isHaveOption(null, optionName);
+    };
+
+    /*
+     * Get key/value pair of the options in the specify section
+     * @param {string} sectionName a section name defined in ini [section name]. If sectionName
+     * is null then the default section will be used.
+     * @return {Array.} an array contain several sub arrays which are composed by optionName,
+     * optionValue. The returned array looks like [[optionName0, optionValue0], ...]
+     */
+    ConfigIniParser.prototype.items = function (sectionName) {
+        var section = _findSection(
+            this._ini,
+            sectionName ? sectionName : DEFAULT_SECTION
+        );
+        var items = [];
+
+        for (var i = 0; i < section.options.length; i++) {
+            var option = section.options[i];
+            items.push([option.name, option.value]);
+        }
+
+        return items;
+    };
+
+    /*
+     * Get all the option names from the specify section. If the sectionName is null
+     * the default section will be used
+     * @param {string} sectionName a section name defined in ini [section name]
+     * @return {Array.} an string array contain all the option names
+     */
+    ConfigIniParser.prototype.options = function (sectionName) {
+        var section = _findSection(
+            this._ini,
+            sectionName ? sectionName : DEFAULT_SECTION
+        );
+        if (section) {
+            var optionNames = [];
+            var options = section.options;
+            var option;
+            for (var i = 0; i < options.length; i++) {
+                option = options[i];
+                optionNames.push(option.name);
+            }
+            return optionNames;
+        } else {
+            throw errorNoSection;
+        }
+    };
+
+    /*
+     * Remove the specify option from the section if the option exist then remove it
+     * and return true else return false. If the sectionName null then the default
+     * section will be used.
+     *
+     * @param {string} sectionName a section name defined in ini [section name]
+     * @param {string} optionName
+     * @return, boolean
+     */
+    ConfigIniParser.prototype.removeOption = function (
+        sectionName,
+        optionName
+    ) {
+        var section = _findSection(
+            this._ini,
+            sectionName ? sectionName : DEFAULT_SECTION
+        );
+        if (section) {
+            var optionIndex = _findOptionIndex(section, optionName);
+            if (optionIndex != NOT_FOUND) {
+                section.options.splice(optionIndex, 1);
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    /*
+     * Remove the specify option from the default section if the option exist then remove it
+     * and return true else return false.
+     *
+     * @param {string} optionName
+     * @return, boolean
+     */
+    ConfigIniParser.prototype.removeOptionFromDefaultSection = function (
+        optionName
+    ) {
+        return this.removeOption(null, optionName);
+    };
+
+    /*
+     * Remove the specify section if the section exist then remove it
+     * and return true else return false. If null is passed. Then the
+     * default section will be removed
+     *
+     * @param {string} sectionName
+     * @return {boolean}
+     */
+    ConfigIniParser.prototype.removeSection = function (sectionName) {
+        var sectionIndex = _findSectionIndex(
+            this._ini,
+            sectionName ? sectionName : DEFAULT_SECTION
+        );
+        if (sectionIndex != NOT_FOUND) {
+            this._ini.sections.splice(sectionIndex, 1);
+            if (sectionName === DEFAULT_SECTION) {
+                this._ini.sections.push(_createSection(DEFAULT_SECTION));
+            }
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    /*
+     * Get all the section names from the ini content
+     * @return {Array.} an string array
+     */
+    ConfigIniParser.prototype.sections = function () {
+        var sectionNames = [];
+        var sections = this._ini.sections;
+        var section;
+        for (var i = 0; i < sections.length; i++) {
+            section = sections[i];
+            if (section.name != DEFAULT_SECTION) {
+                sectionNames.push(section.name);
+            }
+        }
+        return sectionNames;
+    };
+
+    /*
+     * Set a option value, if the option is not exist then it will be created and add
+     * to the section. If the section is not exist an errorNoSection will be thrown.
+     * If the section name is null then the option will be added into the default section
+     * @param {string} sectionName, string
+     * @param {string} optionName, string
+     * @param {string} value, a value should be able to converted to string
+     * @return {object} parser object itself
+     */
+    ConfigIniParser.prototype.set = function (sectionName, optionName, value) {
+        var section = _findSection(
+            this._ini,
+            sectionName ? sectionName : DEFAULT_SECTION
+        );
+        var option;
+        if (section) {
+            option = _findOption(section, optionName);
+            if (option) {
+                option.value = value;
+                return this;
+            } else {
+                option = _createOption(optionName, value);
+                section.options.push(option);
+                return this;
+            }
+        } else {
+            throw errorNoSection;
+        }
+    };
+
+    /*
+     * Set a option value to the default section. if the option is not exist then
+     * it will be created and added to the default section.
+     * @param {string} optionName, string
+     * @param {string} value, a value should be able to converted to string
+     * @return {object} parser object itself
+     */
+    ConfigIniParser.prototype.setOptionInDefaultSection = function (
+        optionName,
+        value
+    ) {
+        return this.set(null, optionName, value);
+    };
+
+    /*
+     * Convert the configuration content to strings the line will the separate with the
+     * given line delimiter. A empty line will be added between each section
+     *
+     * @return {string} the content of configuration
+     */
+    ConfigIniParser.prototype.stringify = function (delimiter) {
+        var lines = [];
+        var sections = this._ini.sections;
+        var currentSection;
+        var options;
+        var currentOption;
+        for (var i = 0; i < sections.length; i++) {
+            currentSection = sections[i];
+            if (currentSection.name != DEFAULT_SECTION) {
+                lines.push("[" + currentSection.name + "]");
+            }
+
+            options = currentSection.options;
+            for (var j = 0; j < options.length; j++) {
+                currentOption = options[j];
+                lines.push(currentOption.name + "=" + currentOption.value);
+            }
+            if (lines.length > 0) {
+                lines.push("");
+            }
+        }
+        return lines.join(delimiter ? delimiter : this.delimiter);
+    };
+
+    /*
+     * Parse a given ini content
+     * @param {string} iniContent, a string normally separated with \r\n or \n
+     * @return {ConfigIniParser} the parser instance itself
+     */
+    ConfigIniParser.prototype.parse = function (iniContent) {
+        if (this._calledParse) {
+            throw errorCallParseMultipleTimes;
+        }
+        this._calledParse = true;
+        var lines = iniContent.split(this.delimiter);
+        var currentSection = _findSection(this._ini, DEFAULT_SECTION);
+
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (line.match(_commentRegex) || line.match(_emptyRegex)) {
+                continue;
+            }
+
+            var sectionInfo = line.match(_sectionRegex);
+            if (sectionInfo) {
+                var sectionName = sectionInfo[SECTION_NAME_INDEX];
+                if (_findSection(this._ini, sectionName)) {
+                    throw errorDuplicateSectionError;
+                } else {
+                    currentSection = _createSection(sectionName);
+                    this._ini.sections.push(currentSection);
+                }
+                continue;
+            }
+
+            var optionInfo = line.match(_optionRegex);
+            if (optionInfo) {
+                var optionName = optionInfo[OPTION_NAME_INDEX];
+                var optionValue = optionInfo[OPTION_VALUE_INDEX];
+                var option = _createOption(optionName, optionValue);
+                currentSection.options.push(option);
+                continue;
+            }
+
+            throw error;
+        }
+        return this;
+    };
+
+    ConfigIniParser.Errors = {
+        Error: error,
+        ErrorNoSection: errorNoSection,
+        ErrorNoOption: errorNoOption,
+        ErrorDuplicateSectionError: errorDuplicateSectionError,
+        ErrorCallParseMultipleTimes: errorCallParseMultipleTimes,
+        ErrorIncorrectArgumentType: errorIncorrectArgumentType,
+    };
+
+    exports.ConfigIniParser = ConfigIniParser;
+})(
+     true
+        ? exports
+        : 0
+);
+
+
+/***/ }),
+
+/***/ 911:
 /***/ ((module, exports) => {
 
 exports = module.exports = SemVer
@@ -5514,588 +6142,6 @@ function coerce (version, options) {
 
 /***/ }),
 
-/***/ 244:
-/***/ ((__unused_webpack_module, exports) => {
-
-/**
- * Created by Erxin, Shang(Edwin) on 6/21/2016.
- * JavaScript Configuration file(.ini) content parser, similar to python ConfigParser without I/O operations
- * The license is under GPL-3.0
- * Git repo:https://github.com/shangerxin/config-ini
- * Author homepage: http://www.shangerxin.com
- * Version, 1.5.9
- */
-
-(function (exports) {
-    var error = Object.assign(new Error(), {
-        name: "ConfigIniParser Error",
-        message: "Parse config ini file error",
-    });
-
-    var errorNoSection = Object.assign(new Error(), {
-        name: "ConfigIniParser Error",
-        message: "The specify section not found",
-    });
-
-    var errorNoOption = Object.assign(new Error(), {
-        name: "ConfigIniParser Error",
-        message: "The specify option not found",
-    });
-
-    var errorDuplicateSectionError = Object.assign(new Error(), {
-        name: "ConfigIniParser Error",
-        message: "Found duplicated section in the given ini file",
-    });
-
-    var errorCallParseMultipleTimes = Object.assign(new Error(), {
-        name: "ConfigIniParser Error",
-        message: "Multiple call parse on the same parser instance",
-    });
-
-    var errorIncorrectArgumentType = Object.assign(new TypeError(), {
-        name: "ConfigIniParser Error",
-        message: "The argument type is not correct",
-    });
-
-    var DEFAULT_SECTION = "__DEFAULT_SECTION__";
-    var _sectionRegex = /^\s*\[\s*([^\]]+?)\s*\]\s*$/;
-    var _optionRegex = /\s*([^=:\s]+)\s*[=:]\s*(.*)\s*/;
-    var _commentRegex = /^\s*[#;].*/;
-    var _emptyRegex = /^\s*$/;
-    var SECTION_NAME_INDEX = 1;
-    var OPTION_NAME_INDEX = 1;
-    var OPTION_VALUE_INDEX = 2;
-    var NOT_FOUND = -1;
-    var DEFAULT_DELIMITER = "\n";
-
-    function _findSection(iniStructure, sectionName) {
-        var sections = iniStructure.sections;
-        for (var i = 0; i < sections.length; i++) {
-            var section = sections[i];
-            if (section.name == sectionName) {
-                return section;
-            }
-        }
-    }
-
-    function _findSectionIndex(iniStructure, sectionName) {
-        var sections = iniStructure.sections;
-        for (var i = 0; i < sections.length; i++) {
-            var section = sections[i];
-            if (section.name == sectionName) {
-                return i;
-            }
-        }
-
-        return NOT_FOUND;
-    }
-
-    function _findOption(section, optionName) {
-        var options = section.options;
-        for (var i = 0; i < options.length; i++) {
-            var option = options[i];
-            if (option.name == optionName) {
-                return option;
-            }
-        }
-    }
-
-    function _findOptionIndex(section, optionName) {
-        var options = section.options;
-        for (var i = 0; i < options.length; i++) {
-            var option = options[i];
-            if (option.name == optionName) {
-                return i;
-            }
-        }
-
-        return NOT_FOUND;
-    }
-
-    function _createSection(name) {
-        return {
-            name: name,
-            options: [],
-        };
-    }
-
-    function _createOption(name, value) {
-        return {
-            name: name,
-            value: value,
-        };
-    }
-
-    /*
-     * Create a ini file parser, the format of ini file could be found at
-     * https://en.wikipedia.org/wiki/INI_file
-     *
-     * Duplicated sections will cause exception, duplicated options will be
-     * ignored and only the first one will take effect.
-     *
-     * @constructor
-     * @param {string} delimiter, the line delimiter which is used to separate the lines
-     * @return {ConfigIniParser} a ConfigIniParser object
-     */
-    var ConfigIniParser = function (delimiter) {
-        this.delimiter = delimiter ? delimiter : DEFAULT_DELIMITER;
-        this._calledParse = false;
-
-        /*
-         _init object structure
-         {
-             sections:[
-                 {
-                     name:string,
-                     options:[
-                         {
-                             name:string,
-                             value:value
-                         },
-                     ]
-                 },
-             ]
-         }
-         */
-        this._ini = {
-            sections: [],
-        };
-
-        this._ini.sections.push(_createSection(DEFAULT_SECTION));
-    };
-
-    /*
-     * Create a new section, if the section is already contain in the structure then
-     * a duplicated section exception will be thrown
-     * @param {string} sectionName a section name defined in ini [section name]
-     * @return {object} the created section object
-     */
-    ConfigIniParser.prototype.addSection = function (sectionName) {
-        if (_findSection(this._ini, sectionName)) {
-            throw errorDuplicateSectionError;
-        } else {
-            var section = _createSection(sectionName);
-            this._ini.sections.push(section);
-            return this;
-        }
-    };
-
-    /*
-     * Get a specific option value
-     * @param {string} sectionName the name defined in ini `[section name]`. If null the default
-     *      section will be used.
-     * @param {string} optionName the name defined in ini `option-name = option-value`
-     * @param {object} defaultValue optional default value to be used when the option does not exist. If it is not provided and the option value does not exist, then an exception is thrown.
-     * @return {string/object} the string value of the option or defaultValue
-     */
-    ConfigIniParser.prototype.get = function (
-        sectionName,
-        optionName,
-        defaultValue
-    ) {
-        var section = _findSection(
-            this._ini,
-            sectionName ? sectionName : DEFAULT_SECTION
-        );
-        if (section) {
-            var option = _findOption(section, optionName);
-            if (option) {
-                return option.value;
-            }
-        }
-
-        if (defaultValue === undefined) {
-            throw errorNoOption;
-        } else {
-            return defaultValue;
-        }
-    };
-
-    /*
-     * Get a option from the default section. This is a convenient method when get the
-     * option from the default section.
-     * @param {string} optionName the name defined in ini `option-name = option-value`
-     * @param {object} defaultValue optional default value to be used when the option does not exist. If it is not provided and the value does not exist, then an exception is thrown.
-     * @return {string/object} the string value of the option or defaultValue
-     */
-    ConfigIniParser.prototype.getOptionFromDefaultSection = function (
-        optionName,
-        defaultValue
-    ) {
-        return this.get(null, optionName, defaultValue);
-    };
-
-    /*
-     * Get the option from the section and convert the value to boolean, if the value
-     * is a number then return true if it is
-     * not equal to 0; if the value is string and which value is "true"/"false" then
-     * will be converted to bool, return true if it is "true";
-     * @param {string} sectionName the name defined in ini `[section name]`
-     * @param {string} optionName the name defined in ini `option-name = option-value`
-     * @return {boolean} indicate the value is true or false
-     */
-    ConfigIniParser.prototype.getBoolean = function (sectionName, optionName) {
-        var value = this.get(
-            sectionName ? sectionName : DEFAULT_SECTION,
-            optionName
-        );
-
-        if (isNaN(value)) {
-            return String(value).toLowerCase() == "true";
-        } else {
-            return value != 0;
-        }
-    };
-
-    /*
-     * Get the option from the default section and convert the value to boolean, if the
-     * value is a number then return true if it is
-     * not equal to 0; if the value is string and which value is "true"/"false" then
-     * will be converted to bool, return true if it is "true";
-     * @param {string} optionName the name defined in ini `option-name = option-value`
-     * @return {boolean} indicate the value is true or false
-     */
-    ConfigIniParser.prototype.getBooleanFromDefaultSection = function (
-        optionName
-    ) {
-        return this.getBoolean(null, optionName);
-    };
-
-    /*
-     * Get the option from the section and convert the value to number
-     * @param {string} sectionName the name defined in ini `[section name]`
-     * @param {string} optionName the name defined in ini `option-name = option-value`
-     * @return {number/NaN} number or NaN
-     */
-    ConfigIniParser.prototype.getNumber = function (sectionName, optionName) {
-        return +this.get(
-            sectionName ? sectionName : DEFAULT_SECTION,
-            optionName
-        );
-    };
-
-    /*
-     * Get the option from the default section and convert the value to number
-     * @param {string} optionName the name defined in ini `option-name = option-value`
-     * @return {number/NaN} number or NaN
-     */
-    ConfigIniParser.prototype.getNumberFromDefaultSection = function (
-        optionName
-    ) {
-        return this.getNumber(null, optionName);
-    };
-
-    /*
-     * Check a specify section is exist or not
-     * @return {boolean} to indicate the result
-     */
-    ConfigIniParser.prototype.isHaveSection = function (sectionName) {
-        if (!sectionName) {
-            throw errorIncorrectArgumentType;
-        }
-        return !!_findSection(this._ini, sectionName);
-    };
-
-    /*
-     * Check an option is exist in a section or not.
-     * @param {string} sectionName the name of the section. If null a default section will
-     * be used
-     * @return {boolean} boolean
-     */
-    ConfigIniParser.prototype.isHaveOption = function (
-        sectionName,
-        optionName
-    ) {
-        var section = _findSection(
-            this._ini,
-            sectionName ? sectionName : DEFAULT_SECTION
-        );
-        if (section) {
-            var option = _findOption(section, optionName);
-            if (option) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    /*
-     * Check an option is exist in the default section or not.
-     * @return {boolean} boolean
-     */
-    ConfigIniParser.prototype.isHaveOptionInDefaultSection = function (
-        optionName
-    ) {
-        return this.isHaveOption(null, optionName);
-    };
-
-    /*
-     * Get key/value pair of the options in the specify section
-     * @param {string} sectionName a section name defined in ini [section name]. If sectionName
-     * is null then the default section will be used.
-     * @return {Array.} an array contain several sub arrays which are composed by optionName,
-     * optionValue. The returned array looks like [[optionName0, optionValue0], ...]
-     */
-    ConfigIniParser.prototype.items = function (sectionName) {
-        var section = _findSection(
-            this._ini,
-            sectionName ? sectionName : DEFAULT_SECTION
-        );
-        var items = [];
-
-        for (var i = 0; i < section.options.length; i++) {
-            var option = section.options[i];
-            items.push([option.name, option.value]);
-        }
-
-        return items;
-    };
-
-    /*
-     * Get all the option names from the specify section. If the sectionName is null
-     * the default section will be used
-     * @param {string} sectionName a section name defined in ini [section name]
-     * @return {Array.} an string array contain all the option names
-     */
-    ConfigIniParser.prototype.options = function (sectionName) {
-        var section = _findSection(
-            this._ini,
-            sectionName ? sectionName : DEFAULT_SECTION
-        );
-        if (section) {
-            var optionNames = [];
-            var options = section.options;
-            var option;
-            for (var i = 0; i < options.length; i++) {
-                option = options[i];
-                optionNames.push(option.name);
-            }
-            return optionNames;
-        } else {
-            throw errorNoSection;
-        }
-    };
-
-    /*
-     * Remove the specify option from the section if the option exist then remove it
-     * and return true else return false. If the sectionName null then the default
-     * section will be used.
-     *
-     * @param {string} sectionName a section name defined in ini [section name]
-     * @param {string} optionName
-     * @return, boolean
-     */
-    ConfigIniParser.prototype.removeOption = function (
-        sectionName,
-        optionName
-    ) {
-        var section = _findSection(
-            this._ini,
-            sectionName ? sectionName : DEFAULT_SECTION
-        );
-        if (section) {
-            var optionIndex = _findOptionIndex(section, optionName);
-            if (optionIndex != NOT_FOUND) {
-                section.options.splice(optionIndex, 1);
-                return true;
-            }
-        }
-
-        return false;
-    };
-
-    /*
-     * Remove the specify option from the default section if the option exist then remove it
-     * and return true else return false.
-     *
-     * @param {string} optionName
-     * @return, boolean
-     */
-    ConfigIniParser.prototype.removeOptionFromDefaultSection = function (
-        optionName
-    ) {
-        return this.removeOption(null, optionName);
-    };
-
-    /*
-     * Remove the specify section if the section exist then remove it
-     * and return true else return false. If null is passed. Then the
-     * default section will be removed
-     *
-     * @param {string} sectionName
-     * @return {boolean}
-     */
-    ConfigIniParser.prototype.removeSection = function (sectionName) {
-        var sectionIndex = _findSectionIndex(
-            this._ini,
-            sectionName ? sectionName : DEFAULT_SECTION
-        );
-        if (sectionIndex != NOT_FOUND) {
-            this._ini.sections.splice(sectionIndex, 1);
-            if (sectionName === DEFAULT_SECTION) {
-                this._ini.sections.push(_createSection(DEFAULT_SECTION));
-            }
-            return true;
-        } else {
-            return false;
-        }
-    };
-
-    /*
-     * Get all the section names from the ini content
-     * @return {Array.} an string array
-     */
-    ConfigIniParser.prototype.sections = function () {
-        var sectionNames = [];
-        var sections = this._ini.sections;
-        var section;
-        for (var i = 0; i < sections.length; i++) {
-            section = sections[i];
-            if (section.name != DEFAULT_SECTION) {
-                sectionNames.push(section.name);
-            }
-        }
-        return sectionNames;
-    };
-
-    /*
-     * Set a option value, if the option is not exist then it will be created and add
-     * to the section. If the section is not exist an errorNoSection will be thrown.
-     * If the section name is null then the option will be added into the default section
-     * @param {string} sectionName, string
-     * @param {string} optionName, string
-     * @param {string} value, a value should be able to converted to string
-     * @return {object} parser object itself
-     */
-    ConfigIniParser.prototype.set = function (sectionName, optionName, value) {
-        var section = _findSection(
-            this._ini,
-            sectionName ? sectionName : DEFAULT_SECTION
-        );
-        var option;
-        if (section) {
-            option = _findOption(section, optionName);
-            if (option) {
-                option.value = value;
-                return this;
-            } else {
-                option = _createOption(optionName, value);
-                section.options.push(option);
-                return this;
-            }
-        } else {
-            throw errorNoSection;
-        }
-    };
-
-    /*
-     * Set a option value to the default section. if the option is not exist then
-     * it will be created and added to the default section.
-     * @param {string} optionName, string
-     * @param {string} value, a value should be able to converted to string
-     * @return {object} parser object itself
-     */
-    ConfigIniParser.prototype.setOptionInDefaultSection = function (
-        optionName,
-        value
-    ) {
-        return this.set(null, optionName, value);
-    };
-
-    /*
-     * Convert the configuration content to strings the line will the separate with the
-     * given line delimiter. A empty line will be added between each section
-     *
-     * @return {string} the content of configuration
-     */
-    ConfigIniParser.prototype.stringify = function (delimiter) {
-        var lines = [];
-        var sections = this._ini.sections;
-        var currentSection;
-        var options;
-        var currentOption;
-        for (var i = 0; i < sections.length; i++) {
-            currentSection = sections[i];
-            if (currentSection.name != DEFAULT_SECTION) {
-                lines.push("[" + currentSection.name + "]");
-            }
-
-            options = currentSection.options;
-            for (var j = 0; j < options.length; j++) {
-                currentOption = options[j];
-                lines.push(currentOption.name + "=" + currentOption.value);
-            }
-            if (lines.length > 0) {
-                lines.push("");
-            }
-        }
-        return lines.join(delimiter ? delimiter : this.delimiter);
-    };
-
-    /*
-     * Parse a given ini content
-     * @param {string} iniContent, a string normally separated with \r\n or \n
-     * @return {ConfigIniParser} the parser instance itself
-     */
-    ConfigIniParser.prototype.parse = function (iniContent) {
-        if (this._calledParse) {
-            throw errorCallParseMultipleTimes;
-        }
-        this._calledParse = true;
-        var lines = iniContent.split(this.delimiter);
-        var currentSection = _findSection(this._ini, DEFAULT_SECTION);
-
-        for (var i = 0; i < lines.length; i++) {
-            var line = lines[i];
-            if (line.match(_commentRegex) || line.match(_emptyRegex)) {
-                continue;
-            }
-
-            var sectionInfo = line.match(_sectionRegex);
-            if (sectionInfo) {
-                var sectionName = sectionInfo[SECTION_NAME_INDEX];
-                if (_findSection(this._ini, sectionName)) {
-                    throw errorDuplicateSectionError;
-                } else {
-                    currentSection = _createSection(sectionName);
-                    this._ini.sections.push(currentSection);
-                }
-                continue;
-            }
-
-            var optionInfo = line.match(_optionRegex);
-            if (optionInfo) {
-                var optionName = optionInfo[OPTION_NAME_INDEX];
-                var optionValue = optionInfo[OPTION_VALUE_INDEX];
-                var option = _createOption(optionName, optionValue);
-                currentSection.options.push(option);
-                continue;
-            }
-
-            throw error;
-        }
-        return this;
-    };
-
-    ConfigIniParser.Errors = {
-        Error: error,
-        ErrorNoSection: errorNoSection,
-        ErrorNoOption: errorNoOption,
-        ErrorDuplicateSectionError: errorDuplicateSectionError,
-        ErrorCallParseMultipleTimes: errorCallParseMultipleTimes,
-        ErrorIncorrectArgumentType: errorIncorrectArgumentType,
-    };
-
-    exports.ConfigIniParser = ConfigIniParser;
-})(
-     true
-        ? exports
-        : 0
-);
-
-
-/***/ }),
-
 /***/ 294:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -6497,6 +6543,14 @@ module.exports = require("events");
 
 "use strict";
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 292:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("fs/promises");
 
 /***/ }),
 

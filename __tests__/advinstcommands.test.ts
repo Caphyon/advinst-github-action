@@ -4,7 +4,7 @@ jest.mock('../src/utils');
 const mockUtils: jest.Mocked<typeof utils> = <jest.Mocked<typeof utils>>utils;
 
 import fs from 'fs/promises';
-import { format } from 'path';
+import {format} from 'path';
 jest.mock('fs/promises');
 const mockFS: jest.Mocked<typeof fs> = <jest.Mocked<typeof fs>>fs;
 
@@ -24,5 +24,7 @@ test('Test getCommandsFile', async () => {
 
   const result = await advinstCommands.toCommandsFile();
   expect(result).toBe(commandsFile);
-  expect(mockFS.writeFile).toHaveBeenCalledWith(commandsFile, aicContent, {encoding: 'utf8'});
+  expect(mockFS.writeFile).toHaveBeenCalledWith(commandsFile, aicContent, {
+    encoding: 'utf8'
+  });
 });

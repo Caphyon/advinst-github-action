@@ -7,8 +7,9 @@ const mockToolCache: jest.Mocked<typeof toolCache> = <
 >toolCache;
 
 import * as utils from '../src/utils';
-jest.mock('../src/utils');
-const mockUtils: jest.Mocked<typeof utils> = <jest.Mocked<typeof utils>>utils;
+
+// jest.mock('../src/utils');
+// const mockUtils: jest.Mocked<typeof utils> = <jest.Mocked<typeof utils>>utils;
 
 import * as exec from '@actions/exec';
 jest.mock('@actions/exec');
@@ -39,11 +40,23 @@ describe('Test AdvinstTool.download', () => {
     );
     expect(result).toBe('fooToolPath');
   });
+
+  it('should use a custom url location', async () => {
+    process.env.advancedinstaller_url = 'https://example.com/advinst.msi';
+    mockToolCache.downloadTool.mockResolvedValue('fooToolPath');
+    const advinstTool = new AdvinstTool('19.0', 'fooLicense', false);
+    const result = await advinstTool.download();
+    expect(toolCache.downloadTool).toHaveBeenCalledWith(
+      'https://example.com/advinst.msi'
+    );
+    expect(result).toBe('fooToolPath');
+    delete process.env.advancedinstaller_url;
+  });
 });
 
 describe('Test AdvinstTool.extract', () => {
   it('should succeed', async () => {
-    mockUtils.getRunnerTempDir.mockReturnValue('fooRunnerTmpDir');
+    jest.spyOn(utils, 'getRunnerTempDir').mockReturnValue('fooRunnerTmpDir');
     mockExec.getExecOutput.mockResolvedValue({
       exitCode: 0,
       stdout: 'fooStdout',
@@ -66,7 +79,7 @@ describe('Test AdvinstTool.extract', () => {
   });
 
   it('should fail', async () => {
-    mockUtils.getRunnerTempDir.mockReturnValue('fooRunnerTmpDir');
+    jest.spyOn(utils, 'getRunnerTempDir').mockReturnValue('fooRunnerTempDir');
     mockExec.getExecOutput.mockResolvedValue({
       exitCode: 1,
       stdout: 'fooStdout',
@@ -181,7 +194,7 @@ describe('Test AdvinstTool.getPath', () => {
       .spyOn(AdvinstTool.prototype, 'exportVariables')
       .mockImplementation(jest.fn());
     mockCore.addPath.mockImplementation(jest.fn());
-    mockUtils.exists.mockResolvedValue(true);
+    jest.spyOn(utils, 'exists').mockResolvedValue(true);
   });
 
   it('should use cached tool path', async () => {

@@ -63,20 +63,27 @@ run();
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getVariable = exports.getRunnerTempDir = exports.isWindows = void 0;
-const assert_1 = __importDefault(__nccwpck_require__(491));
+exports.exists = exports.getVariable = exports.getRunnerTempDir = exports.isWindows = void 0;
+const promises_1 = __importDefault(__nccwpck_require__(292));
 function isWindows() {
     return process.platform === 'win32';
 }
 exports.isWindows = isWindows;
 function getRunnerTempDir() {
-    const tempDirectory = getVariable('RUNNER_TEMP');
-    (0, assert_1.default)(tempDirectory, 'Expected RUNNER_TEMP to be defined');
-    return tempDirectory;
+    return getVariable('RUNNER_TEMP');
 }
 exports.getRunnerTempDir = getRunnerTempDir;
 function getVariable(name) {
@@ -84,6 +91,18 @@ function getVariable(name) {
     return value;
 }
 exports.getVariable = getVariable;
+function exists(path) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield promises_1.default.access(path);
+            return true;
+        }
+        catch (error) {
+            return false;
+        }
+    });
+}
+exports.exists = exists;
 
 
 /***/ }),
@@ -2203,6 +2222,14 @@ module.exports = require("events");
 
 "use strict";
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 292:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("fs/promises");
 
 /***/ }),
 

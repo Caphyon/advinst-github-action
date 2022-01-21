@@ -3,7 +3,7 @@ import * as exec from '@actions/exec';
 import * as toolCache from '@actions/tool-cache';
 
 import {dirname, join} from 'path';
-import {exists, getRunnerTempDir} from './utils';
+import {exists, getRunnerTempDir, getVariable} from './utils';
 import util from 'util';
 
 export class AdvinstTool {
@@ -11,23 +11,27 @@ export class AdvinstTool {
   private license: string;
   private enableCom: boolean;
 
-  private static advinstDownloadUrlTemplate =
+  private static readonly advinstCustomUrlVar = 'advancedinstaller_url';
+  private static readonly advinstDownloadUrlTemplate =
     'https://www.advancedinstaller.com/downloads/%s/advinst.msi';
-  private static advinstExtractCmdTemplate =
+  private static readonly advinstExtractCmdTemplate =
     'msiexec /a "%s" TARGETDIR="%s" /qn';
-  private static advinstRegisterCmdTemplate = '%s /RegisterCI %s';
-  private static advinstStartComCmdTemplate = '%s /REGSERVER';
-  private static advinstComPathTemplate = '%s\\bin\\x86\\advancedinstaller.com';
-  private static asdvinstMsbuildTagetPathTemplate =
+  private static readonly advinstRegisterCmdTemplate = '%s /RegisterCI %s';
+  private static readonly advinstStartComCmdTemplate = '%s /REGSERVER';
+  private static readonly advinstComPathTemplate =
+    '%s\\bin\\x86\\advancedinstaller.com';
+  private static readonly asdvinstMsbuildTagetPathTemplate =
     '%s\\ProgramFilesFolder\\MSBuild\\Caphyon\\Advanced Installer';
 
-  private static advinstCacheToolName = 'advinst';
-  private static advinstCacheToolArch = 'x86';
+  private static readonly advinstCacheToolName = 'advinst';
+  private static readonly advinstCacheToolArch = 'x86';
 
-  private static advinstMSBuildTargetsVar = 'AdvancedInstallerMSBuildTargets';
-  private static advinstToolRootVar = 'AdvancedInstallerRoot';
+  private static readonly advinstMSBuildTargetsVar =
+    'AdvancedInstallerMSBuildTargets';
+  private static readonly advinstToolRootVar = 'AdvancedInstallerRoot';
 
   constructor(version: string, license: string, enableCom: boolean) {
+    this.version = version;
     this.version = version;
     this.license = license;
     this.enableCom = enableCom;
@@ -70,7 +74,16 @@ export class AdvinstTool {
   }
 
   async download(): Promise<string> {
-    core.info('Downloading advinst tool');
+    //Check if a custom URL is set. If so, use it.
+    const customUrl = getVariable(AdvinstTool.advinstCustomUrlVar);
+    if (customUrl) {
+      core.info(
+        util.format('Using custom URL for advinst tool: %s', customUrl)
+      );
+      return await toolCache.downloadTool(customUrl);
+    }
+
+    core.info(`Downloading advinst tool with version: ${this.version}`);
     const url = util.format(
       AdvinstTool.advinstDownloadUrlTemplate,
       this.version
