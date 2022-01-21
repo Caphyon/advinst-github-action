@@ -94,6 +94,11 @@ jobs:
           aip-commands: |
             SetProperty FOO="foo"
             SetVersion 1.2.0
+      - name: Publish setup artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: setup
+          path: ${{ github.workspace }}\setup\setup.msi
 ```
 
 ### 2. Deploy tool and build aip project using PowerShell commands
