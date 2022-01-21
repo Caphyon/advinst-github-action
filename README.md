@@ -1,6 +1,7 @@
 # Advanced Installer GitHub Action
 
 This action will integrate [Advanced Installer Tool](https://www.advancedinstaller.com) in the GitHub CI/CD workflow. It has the following capabilities: 
+
 * Deploy Advanced Installer on the GitHub runner.
 * Build an Advanced Installer project (.AIP)
 
@@ -24,14 +25,16 @@ with:
 ```
 
 The input parameters are of two categories:
+
 * Tool Deploy Parameters - their names have format: **advinst-***
 * AIP Project Parameters - their names have format: **aip-***
 
-***By specifyng only the Tool Parameters you can restrict the action usage to deploy only.***
+***By specifying only the Tool Parameters you can restrict the action usage to deploy only. You can use it when you plan on using Advanced Installer from  a [PowerShell script](https://www.advancedinstaller.com/user-guide/powershell-automation.html) or build a
+our [Visual Studio project](https://www.advancedinstaller.com/user-guide/ai-ext-vs-project.html)***
 
 ### advinst-version
 
-Advanced Installer version to deploy. If not specified the latest version will be used. For a list of valid versions please see http://www.advancedinstaller.com/version-history.html
+Advanced Installer version to deploy. If not specified the latest version will be used. For a list of valid versions please see the [versions history](http://www.advancedinstaller.com/version-history.html)
 
 ### advinst-license
 
@@ -147,3 +150,7 @@ jobs:
         run: msbuild ${{ github.workspace }}\MyAwesomeApp\MyAwesomeApp.sln
 ```
 
+### Contact us
+
+We would love to hear your feedback! Tell us how to improve this  action at [support at advancedinstaller dot com](support@advancedinstaller.com), or
+open a [Github Issue](https://github.com/Caphyon/advinst-github-action/issues).
