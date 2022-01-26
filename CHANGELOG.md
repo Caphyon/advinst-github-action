@@ -2,7 +2,7 @@
 
 Changelog of Advanced Installer GitHub action
 
-## v1.0.0
+## v1.0
 
 * First official release.
 

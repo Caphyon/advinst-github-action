@@ -10,7 +10,7 @@ This action will integrate [Advanced Installer Tool](https://www.advancedinstall
 See [action.yml](action.yml).
 
 ```yml
-uses: caphyon/advinst-github-action@v1
+uses: caphyon/advinst-github-action@v1.0
 with:
   advinst-version: '<version>'
   advinst-license: '<license_id>'
@@ -82,7 +82,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Build AIP
-        uses: caphyon/advinst-github-action@v1
+        uses: caphyon/advinst-github-action@v1.0
         with:
           advinst-version: '19.0'
           advinst-license: ${{ secrets.ADVINST_LICENSE_KEY }}
@@ -114,7 +114,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Deploy Advinst
-        uses: caphyon/advinst-github-action@v1
+        uses: caphyon/advinst-github-action@v1.0
         with:
           advinst-version: '19.0'
           advinst-license: ${{ secrets.ADVINST_LICENSE_KEY }}
@@ -148,7 +148,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Deploy Advinst
-        uses: caphyon/advinst-github-action@v1
+        uses: caphyon/advinst-github-action@v1.0
         with:
           advinst-version: '19.0'
           advinst-license: ${{ secrets.ADVINST_LICENSE_KEY }}
