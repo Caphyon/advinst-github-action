@@ -158,9 +158,13 @@ jobs:
         run: msbuild ${{ github.workspace }}\MyAwesomeApp\MyAwesomeApp.sln
 ```
 
+### How To Use
+
+For more examples on how to use this action in various scenarios checkout our [actions playground repo](https://github.com/Caphyon/github-actions-playground/tree/main/.github/workflows)
+
 ### Contact us
 
-We would love to hear your feedback! Tell us how to improve this  action at ***support at advancedinstaller dot com***, or
+We would love to hear your feedback! Tell us how to improve this action at ***support at advancedinstaller dot com***, or
 open a [Github Issue](https://github.com/Caphyon/advinst-github-action/issues).
 
 On our website you can find a list with all the [CI/CD integrations for Advanced Installer](https://www.advancedinstaller.com/installer-continuous-integration.html).
