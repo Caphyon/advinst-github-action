@@ -160,7 +160,7 @@ jobs:
 
 ### How To Use
 
-For more examples on how to use this action in various scenarios checkout our [actions playground repo](https://github.com/Caphyon/github-actions-playground/tree/main/.github/workflows)
+For more examples on how to use this action in various scenarios checkout our [actions playground repo](https://github.com/Caphyon/github-actions-playground/tree/main/.github/workflows).
 
 ### Contact us
 
