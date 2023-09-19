@@ -1,5 +1,10 @@
-import {getLatest, getAll, getMinAllowedAdvinstVersion, versionIsDeprecated} from '../src/advinstversions';
 import * as toolCache from '@actions/tool-cache';
+import {
+  getLatest,
+  getAll,
+  getMinAllowedAdvinstVersion,
+  versionIsDeprecated
+} from '../src/advinstversions';
 import path from 'path';
 
 jest.mock('@actions/tool-cache');
@@ -20,7 +25,9 @@ test('Test getAll', async () => {
     path.resolve(__dirname, './__data__/updates.ini')
   );
   const versions = await getAll();
-  expect(versions).toEqual(expect.arrayContaining(['21.0.1', '21.0', '19.0', '18.9.1', '18.9', '16.0']));
+  expect(versions).toEqual(
+    expect.arrayContaining(['21.0.1', '21.0', '19.0', '18.9.1', '18.9', '16.0'])
+  );
 });
 
 test('Test getMinAllowedAdvinstVersion', async () => {
