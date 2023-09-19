@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
+import {getLatest, versionIsDeprecated} from './advinstversions';
 import {AdvinstBuilder} from './advinstbuilder';
 import {AdvinstTool} from './advinsttool';
-import {getLatest} from './advinstversions';
 import {isWindows} from './utils';
 
 async function run(): Promise<void> {
@@ -15,6 +15,15 @@ async function run(): Promise<void> {
     core.debug(`Advinst license: ${license}`);
     const enable_com = core.getInput('advinst-enable-automation');
     core.debug(`Advinst enable com: ${enable_com}`);
+
+    const [isDeprecated, minAllowedVer] = await versionIsDeprecated(version);
+    if (isDeprecated) {
+      core.warning(
+        `We want to provide the best experience for you and support the newest Advanced Installer features.
+        To do so, we will no longer be supporting older versions of the software in the near future.
+        Please note that the minimum required version is ${minAllowedVer} and the configured version is ${version}.`
+      );
+    }
 
     core.startGroup('Advanced Installer Tool Deploy');
     const advinstTool = new AdvinstTool(
