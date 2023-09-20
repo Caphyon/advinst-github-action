@@ -1,8 +1,10 @@
 import * as core from '@actions/core';
 import {getLatest, versionIsDeprecated} from './advinstversions';
+import {ADVINST_VER_DEPRECATION_WARNING} from './messages';
 import {AdvinstBuilder} from './advinstbuilder';
 import {AdvinstTool} from './advinsttool';
 import {isWindows} from './utils';
+import util from 'util';
 
 async function run(): Promise<void> {
   try {
@@ -18,9 +20,9 @@ async function run(): Promise<void> {
 
     const [isDeprecated, minAllowedVer] = await versionIsDeprecated(version);
     if (isDeprecated) {
-      core.warning(`We want to provide the best experience for you and support the newest Advanced Installer features. \
-      To do so, we will no longer be supporting older versions of the software in the near future. \
-      Please note that the minimum required version is ${minAllowedVer} and the configured version is ${version}.`);
+      core.warning(
+        util.format(ADVINST_VER_DEPRECATION_WARNING, minAllowedVer, version)
+      );
     }
 
     core.startGroup('Advanced Installer Tool Deploy');

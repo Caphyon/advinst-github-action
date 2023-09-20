@@ -455,12 +455,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const advinstversions_1 = __nccwpck_require__(979);
+const messages_1 = __nccwpck_require__(112);
 const advinstbuilder_1 = __nccwpck_require__(170);
 const advinsttool_1 = __nccwpck_require__(635);
 const utils_1 = __nccwpck_require__(918);
+const util_1 = __importDefault(__nccwpck_require__(837));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -475,9 +480,7 @@ function run() {
             core.debug(`Advinst enable com: ${enable_com}`);
             const [isDeprecated, minAllowedVer] = yield (0, advinstversions_1.versionIsDeprecated)(version);
             if (isDeprecated) {
-                core.warning(`We want to provide the best experience for you and support the newest Advanced Installer features. \
-      To do so, we will no longer be supporting older versions of the software in the near future. \
-      Please note that the minimum required version is ${minAllowedVer} and the configured version is ${version}.`);
+                core.warning(util_1.default.format(messages_1.ADVINST_VER_DEPRECATION_WARNING, minAllowedVer, version));
             }
             core.startGroup('Advanced Installer Tool Deploy');
             const advinstTool = new advinsttool_1.AdvinstTool(version, license, enable_com === 'true');
@@ -505,6 +508,18 @@ function run() {
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 112:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ADVINST_VER_DEPRECATION_WARNING = void 0;
+exports.ADVINST_VER_DEPRECATION_WARNING = 'We want to provide the best experience for you and support the newest Advanced Installer features. To do so, we will no longer be supporting older versions of the software in the near future. Please note that the minimum required version is %s and the configured version is %s.';
 
 
 /***/ }),
