@@ -475,9 +475,9 @@ function run() {
             core.debug(`Advinst enable com: ${enable_com}`);
             const [isDeprecated, minAllowedVer] = yield (0, advinstversions_1.versionIsDeprecated)(version);
             if (isDeprecated) {
-                core.warning(`We want to provide the best experience for you and support the newest Advanced Installer features.
-        To do so, we will no longer be supporting older versions of the software in the near future.
-        Please note that the minimum required version is ${minAllowedVer} and the configured version is ${version}.`);
+                core.warning(`We want to provide the best experience for you and support the newest Advanced Installer features. \
+      To do so, we will no longer be supporting older versions of the software in the near future. \
+      Please note that the minimum required version is ${minAllowedVer} and the configured version is ${version}.`);
             }
             core.startGroup('Advanced Installer Tool Deploy');
             const advinstTool = new advinsttool_1.AdvinstTool(version, license, enable_com === 'true');
