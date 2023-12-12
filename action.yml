@@ -30,9 +30,9 @@ inputs:
 
 runs:
   using: 'node16'
-  pre:  'dist\pre\index.js'
-  main: 'dist\main\index.js'
-  post: 'dist\post\index.js'
+  pre:  'dist/pre/index.js'
+  main: 'dist/main/index.js'
+  post: 'dist/post/index.js'
 
 branding:
   icon: 'box'
