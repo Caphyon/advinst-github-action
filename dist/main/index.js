@@ -378,6 +378,9 @@ const fs = __importStar(__nccwpck_require__(7147));
 const toolCache = __importStar(__nccwpck_require__(7784));
 const config_ini_parser_1 = __nccwpck_require__(2244);
 const compare_versions_1 = __nccwpck_require__(4773);
+const utils_1 = __nccwpck_require__(918);
+const advinstIniUrlVar = 'advancedinstaller_ini_url';
+const DEFAULT_ADVINST_INI_URL = 'https://www.advancedinstaller.com/downloads/updates.ini';
 function getLatest() {
     return __awaiter(this, void 0, void 0, function* () {
         const versions = yield getAll();
@@ -387,9 +390,9 @@ function getLatest() {
 exports.getLatest = getLatest;
 function getAll() {
     return __awaiter(this, void 0, void 0, function* () {
-        const versionsFile = yield toolCache.downloadTool('https://www.advancedinstaller.com/downloads/updates.ini');
+        const versionsFileContent = yield _getUpdatesFileContent();
         const ini = new config_ini_parser_1.ConfigIniParser();
-        ini.parse(fs.readFileSync(versionsFile, 'utf8'));
+        ini.parse(versionsFileContent);
         const sections = ini.sections();
         if (sections.length === 0) {
             throw new Error('Invalid updated config file');
@@ -407,9 +410,9 @@ function getMinAllowedAdvinstVersion() {
         const RELEASE_INTERVAL_MONTHS = 24;
         const minReleaseDate = new Date();
         minReleaseDate.setMonth(minReleaseDate.getMonth() - RELEASE_INTERVAL_MONTHS);
-        const versionsFile = yield toolCache.downloadTool('https://www.advancedinstaller.com/downloads/updates.ini');
+        const versionsFileContent = yield _getUpdatesFileContent();
         const ini = new config_ini_parser_1.ConfigIniParser();
-        ini.parse(fs.readFileSync(versionsFile, 'utf8'));
+        ini.parse(versionsFileContent);
         const sections = ini.sections();
         if (sections.length === 0) {
             throw new Error('Invalid updated config file');
@@ -434,6 +437,21 @@ function versionIsDeprecated(version) {
     });
 }
 exports.versionIsDeprecated = versionIsDeprecated;
+function _getUpdatesFileContent() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const advinstIniUrl = (0, utils_1.getVariable)(advinstIniUrlVar) || DEFAULT_ADVINST_INI_URL;
+        const updatesFile = yield toolCache.downloadTool(advinstIniUrl);
+        return _readTextFileWithDetectedEncoding(updatesFile);
+    });
+}
+function _readTextFileWithDetectedEncoding(filePath) {
+    const raw = fs.readFileSync(filePath);
+    const encoding = _hasUtf16LeBom(raw) ? 'utf16le' : 'utf8';
+    return raw.toString(encoding);
+}
+function _hasUtf16LeBom(raw) {
+    return raw.length >= 2 && raw[0] === 0xff && raw[1] === 0xfe;
+}
 
 
 /***/ }),
