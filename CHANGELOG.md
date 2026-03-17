@@ -2,6 +2,9 @@
 
 Changelog of Advanced Installer GitHub action
 
+## v2.0.1
+* Fix issue with updates file encoding.
+
 ## v2.0
 * Add support for Azure Trusted Sign
 * Update to node20
