@@ -6,3 +6,4 @@ lib/
 
 # VS Code
 .vscode/
+.tmp/
