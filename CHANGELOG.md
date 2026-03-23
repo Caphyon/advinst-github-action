@@ -2,6 +2,9 @@
 
 Changelog of Advanced Installer GitHub action
 
+## v2.0.2
+* Update to node24
+
 ## v2.0.1
 * Fix issue with updates file encoding.
 
