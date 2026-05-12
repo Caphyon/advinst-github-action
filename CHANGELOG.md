@@ -2,6 +2,10 @@
 
 Changelog of Advanced Installer GitHub action
 
+## v2.0.3
+Bugs:
+* Changed updates INI download url. This fixes a problem on some machines which marked the ini file as malicious.
+
 ## v2.0.2
 * Update to node24
 
@@ -26,4 +30,3 @@ Changelog of Advanced Installer GitHub action
 * Deploy and register Advanced Installer on runner
 * Enable PowerShell automation
 * Configure and build an Advanced Installer project (.AIP)
-

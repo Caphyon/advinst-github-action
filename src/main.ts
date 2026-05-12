@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import {getLatest, versionIsDeprecated} from './advinstversions';
+import {AdvinstVersions} from './advinstversions';
 import {ADVINST_VER_DEPRECATION_ERROR} from './messages';
 import {AdvinstBuilder} from './advinstbuilder';
 import {AdvinstTool} from './advinsttool';
@@ -11,14 +11,15 @@ async function run(): Promise<void> {
     if (!isWindows()) {
       throw new Error('This action is only supported on Windows platforms');
     }
-    const version = core.getInput('advinst-version') || (await getLatest());
+    const versions = new AdvinstVersions();
+    const version = core.getInput('advinst-version') || (await versions.getLatest());
     core.debug(`Advinst version: ${version}`);
     const license = core.getInput('advinst-license');
     core.debug(`Advinst license: ${license}`);
     const enable_com = core.getInput('advinst-enable-automation');
     core.debug(`Advinst enable com: ${enable_com}`);
 
-    const [isDeprecated, minAllowedVer] = await versionIsDeprecated(version);
+    const [isDeprecated, minAllowedVer] = await versions.versionIsDeprecated(version);
     if (isDeprecated) {
       throw new Error(
         util.format(ADVINST_VER_DEPRECATION_ERROR, minAllowedVer, version)
